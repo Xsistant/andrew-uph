@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Interaktif — Rekrutmen, Appraisal & Motivasi</title>
+<style>
+:root{
+  --primary:#3D2C5C;--secondary:#6A4C93;--accent:#E6E0F0;--highlight:#F4A261;
+  --bg:#F7F5FB;--bgDark:#221833;--text:#202234;--muted:#7E83A0;--good:#2E7D5B;--bad:#C84A4A;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:0;font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Calibri,sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.55;-webkit-text-size-adjust:100%}
+.hero{background:linear-gradient(135deg,var(--bgDark) 0%,var(--primary) 100%);color:#fff;padding:44px 18px 30px;text-align:center}
+.hero h1{font-family:Georgia,serif;font-size:2.2em;margin:0 0 6px}
+.hero p{opacity:.85;margin:4px 0;font-size:.95em}
+.tabs{display:flex;justify-content:center;gap:8px;background:#fff;padding:13px;border-bottom:2px solid var(--accent);
+  position:sticky;top:0;z-index:50;flex-wrap:wrap}
+.tab{padding:10px 18px;background:var(--accent);color:var(--primary);border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:.92em;transition:all .2s}
+.tab.active{background:var(--primary);color:#fff}
+.tab:hover:not(.active){background:var(--secondary);color:#fff}
+.container{max-width:920px;margin:0 auto;padding:26px 18px}
+.panel{display:none}.panel.active{display:block}
+.controls{background:#fff;padding:14px;border-radius:10px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.controls label{font-size:.88em;font-weight:600;color:var(--muted)}
+.controls select{padding:6px 10px;border:1px solid var(--accent);border-radius:6px;background:var(--bg);font-size:.88em}
+.controls button{padding:8px 15px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:.88em}
+.controls button:hover{background:var(--bgDark)}
+.controls .stats{margin-left:auto;font-weight:700;color:var(--primary);font-size:.9em}
+.question{background:#fff;border-radius:12px;padding:20px;margin:18px 0;box-shadow:0 2px 12px rgba(0,0,0,.06);border-left:6px solid var(--primary)}
+.question .meta{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.question .meta .pill{padding:2px 10px;background:var(--accent);color:var(--primary);border-radius:999px;font-size:.72em;font-weight:700}
+.question .meta .pill.recall{background:#D9EAD3;color:#2E7D5B}
+.question .meta .pill.aplikasi{background:#FCE5CD;color:#B8723D}
+.question .meta .pill.analisis{background:#F4CCCC;color:#C84A4A}
+.question .qtext{font-size:1.06em;font-weight:600;margin-bottom:13px}
+.options{display:flex;flex-direction:column;gap:8px}
+.option{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;background:var(--bg);border:2px solid var(--accent);border-radius:8px;cursor:pointer;transition:all .15s;font-size:.95em}
+.option:hover{border-color:var(--secondary)}
+.option.selected{border-color:var(--primary);background:#EFEDF8}
+.option.correct{border-color:var(--good);background:#E8F5EC}
+.option.wrong{border-color:var(--bad);background:#FCE9E9}
+.option .letter{display:inline-block;width:25px;height:25px;border-radius:50%;background:var(--secondary);color:#fff;text-align:center;line-height:25px;font-weight:700;font-size:.82em;flex-shrink:0}
+.option.selected .letter{background:var(--primary)}.option.correct .letter{background:var(--good)}.option.wrong .letter{background:var(--bad)}
+.explanation{margin-top:13px;padding:11px 13px;background:#FFF8E6;border-left:4px solid var(--highlight);border-radius:6px;font-size:.92em;display:none}
+.explanation.show{display:block}.explanation strong{color:#B8723D}
+.qbtn{display:inline-block;margin-top:12px;padding:8px 16px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600}
+.flashcard-wrapper{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:18px}
+.flashcard{width:100%;max-width:600px;height:260px;perspective:1500px;cursor:pointer}
+.flashcard-inner{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg)}
+.flashcard-front,.flashcard-back{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:26px;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.1);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.flashcard-front{background:linear-gradient(135deg,var(--primary),var(--bgDark));color:#fff}
+.flashcard-back{background:linear-gradient(135deg,var(--accent),#fff);color:var(--text);transform:rotateY(180deg);font-size:.93em;line-height:1.55;flex-direction:column}
+.flashcard-front .term{font-size:1.5em;font-weight:700;font-family:Georgia,serif}
+.flashcard-front .hint{position:absolute;bottom:12px;left:0;right:0;font-size:.72em;opacity:.6;font-style:italic}
+.fc-meta{position:absolute;top:12px;left:12px;font-size:.7em;padding:2px 10px;background:rgba(255,255,255,.2);color:#fff;border-radius:999px;max-width:75%}
+.fc-controls{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
+.fc-controls button{padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:.92em}
+.fc-controls button.alt{background:var(--secondary)}.fc-controls button.acc{background:var(--good)}.fc-controls button.bad{background:var(--bad)}
+.fc-controls .progress{font-weight:700;color:var(--primary)}
+.fc-stats{display:flex;gap:22px;justify-content:center;font-size:.92em;color:var(--muted);margin-top:6px}
+.fc-stats .know{color:var(--good);font-weight:700}.fc-stats .dontknow{color:var(--bad);font-weight:700}
+.summary{background:#fff;border-radius:12px;padding:26px;margin-top:22px;text-align:center;display:none;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.summary.show{display:block}
+.summary .score{font-size:3.6em;font-weight:700;font-family:Georgia,serif;color:var(--primary);margin:8px 0}
+.summary .verdict{font-size:1.25em;font-weight:600;margin:8px 0}
+.summary.good .verdict{color:var(--good)}.summary.medium .verdict{color:var(--highlight)}.summary.bad .verdict{color:var(--bad)}
+#matchArea{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media(max-width:560px){#matchArea{grid-template-columns:1fr}.hero h1{font-size:1.8em}}
+footer{background:var(--bgDark);color:var(--accent);text-align:center;padding:24px;margin-top:46px}
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>Kuis Interaktif</h1>
+  <p>Rekrutmen & Seleksi · Analisis Pekerjaan · Appraisal · Motivasi</p>
+  <p style="font-size:.85em;opacity:.7">62 soal · 33 flashcard · 3 set cocokkan</p>
+</div>
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('mc')">📝 Pilihan Ganda</button>
+  <button class="tab" onclick="switchTab('fc')">🃏 Flashcards</button>
+  <button class="tab" onclick="switchTab('match')">🔀 Cocokkan</button>
+</div>
+<div class="container">
+  <div id="mc" class="panel active">
+    <div class="controls">
+      <label>Filter: <select id="chapterFilter" onchange="renderQuestions()"><option value="all">Semua</option></select></label>
+      <label>Tipe: <select id="typeFilter" onchange="renderQuestions()">
+        <option value="all">Semua</option><option value="recall">Recall</option><option value="aplikasi">Aplikasi</option><option value="analisis">Analisis</option>
+      </select></label>
+      <button onclick="resetMC()">🔄 Reset</button>
+      <button onclick="shuffleMC()">🎲 Acak</button>
+      <span class="stats" id="mcStats">0 / 0</span>
+    </div>
+    <div id="questionList"></div>
+    <div id="mcSummary" class="summary"></div>
+  </div>
+  <div id="fc" class="panel">
+    <div class="controls">
+      <label>Filter: <select id="fcChapterFilter" onchange="resetFlashcards()"><option value="all">Semua</option></select></label>
+      <button onclick="shuffleFlashcards()">🎲 Acak</button>
+      <button onclick="resetFlashcards()">🔄 Reset</button>
+    </div>
+    <div class="flashcard-wrapper">
+      <div class="flashcard" id="flashcard" onclick="flipCard()">
+        <div class="flashcard-inner">
+          <div class="flashcard-front"><div class="fc-meta" id="fcMeta">—</div><div class="term" id="fcTerm">Klik untuk mulai</div><div class="hint">(ketuk untuk balik)</div></div>
+          <div class="flashcard-back"><div id="fcDef">—</div></div>
+        </div>
+      </div>
+      <div class="fc-controls"><button class="alt" onclick="prevCard()">← Sebelumnya</button><span class="progress" id="fcProgress">0 / 0</span><button onclick="nextCard()">Selanjutnya →</button></div>
+      <div class="fc-controls" style="margin-top:6px"><button class="bad" onclick="markCard(false)">❌ Belum Tahu</button><button class="acc" onclick="markCard(true)">✓ Sudah Tahu</button></div>
+      <div class="fc-stats"><span>Sudah tahu: <span class="know" id="fcKnow">0</span></span><span>Belum tahu: <span class="dontknow" id="fcDontKnow">0</span></span></div>
+    </div>
+  </div>
+  <div id="match" class="panel">
+    <div class="controls" id="matchControls"></div>
+    <div id="matchArea"><div id="matchLeft"></div><div id="matchRight"></div></div>
+    <div style="text-align:center;margin-top:14px">
+      <button class="qbtn" onclick="checkMatch()">Cek Jawaban</button>
+      <button class="qbtn" style="background:var(--secondary)" onclick="resetMatch()">Reset</button>
+    </div>
+  </div>
+</div>
+<footer>
+  <p style="margin:0;font-family:Georgia,serif;font-size:1.1em">Belajar yang asik & efektif!</p>
+  <p style="margin:6px 0 0;opacity:.7;font-size:.85em">Kuis Interaktif · PIO · Kelompok 1, 2 & 5</p>
+</footer>
+<script>
+const QUESTIONS = [{"chapter": 1, "type": "recall", "q": "Urutan tahapan yang harus dilalui untuk mendapatkan karyawan adalah...", "options": ["Seleksi → Assessment → Rekrutmen", "Rekrutmen → Assessment → Seleksi", "Assessment → Rekrutmen → Seleksi", "Rekrutmen → Seleksi → Assessment"], "correct": 1, "expl": "Tahapan: (1) Rekrutmen (mencari pelamar), (2) Assessment (menilai kemampuan), (3) Seleksi (memilih kandidat terbaik)."}, {"chapter": 1, "type": "recall", "q": "Proses menarik kandidat untuk melamar pekerjaan yang fokus mencari kandidat sesuai disebut...", "options": ["Seleksi", "Rekrutmen", "Assessment", "Validasi"], "correct": 1, "expl": "Rekrutmen = proses menarik kandidat untuk melamar, dengan memperhatikan KSAOs."}, {"chapter": 1, "type": "recall", "q": "Dalam rekrutmen, 'KSAOS' merujuk pada Knowledge, Skills, Abilities, dan...", "options": ["Outcomes", "Other Characteristics", "Objectives", "Operations"], "correct": 1, "expl": "KSAOS = Knowledge, Skills, Abilities, Other characteristics."}, {"chapter": 1, "type": "recall", "q": "Berikut termasuk cara organisasi merekrut, KECUALI...", "options": ["Recruiter", "Iklan lowongan", "Portal lowongan online", "Tes mengemudi"], "correct": 3, "expl": "Metode rekrutmen: recruiter, iklan lowongan, website perusahaan, portal lowongan online. Tes mengemudi adalah work sample (assessment)."}, {"chapter": 1, "type": "recall", "q": "Pemberian gambaran jujur (sisi positif & negatif) suatu pekerjaan untuk mengurangi turnover awal disebut...", "options": ["Realistic Job Preview (RJP)", "Assessment center", "Work sample", "Job evaluation"], "correct": 0, "expl": "RJP memberi gambaran jujur pekerjaan agar kandidat dapat menilai kecocokan & turnover awal berkurang."}, {"chapter": 1, "type": "aplikasi", "q": "Tujuan utama Realistic Job Preview (RJP) adalah...", "options": ["Menambah jumlah pelamar", "Mengurangi turnover awal & membantu kandidat menilai kecocokan kerja", "Mempercepat wawancara", "Menurunkan biaya gaji"], "correct": 1, "expl": "RJP bertujuan mengurangi turnover awal dan membantu kandidat menilai kecocokan kerja."}, {"chapter": 1, "type": "recall", "q": "Proses menilai kemampuan & kecocokan pelamar disebut...", "options": ["Rekrutmen", "Assessment", "Seleksi", "Orientasi"], "correct": 1, "expl": "Assessment = proses menilai kemampuan & kecocokan pelamar (tes psikologis, biographical inventory, wawancara, work samples, assessment center)."}, {"chapter": 1, "type": "recall", "q": "Berikut termasuk jenis assessment, KECUALI...", "options": ["Tes psikologis", "Work samples", "Assessment centers", "Realistic Job Preview"], "correct": 3, "expl": "5 jenis assessment: tes psikologis, biographical inventories, wawancara, work samples, assessment centers. RJP adalah bagian rekrutmen."}, {"chapter": 1, "type": "recall", "q": "Metode assessment yang mengukur data pengalaman hidup & kerja namun sulit diverifikasi disebut...", "options": ["Tes psikologis", "Biographical inventories", "Work samples", "Assessment center"], "correct": 1, "expl": "Biographical inventories mengukur data pengalaman hidup & kerja; kelemahannya sulit diverifikasi."}, {"chapter": 1, "type": "recall", "q": "Antara unstructured & structured interview, yang lebih valid & reliabel adalah...", "options": ["Unstructured (bebas & santai)", "Structured (pertanyaan sama untuk semua pelamar)", "Keduanya sama saja", "Tidak ada yang valid"], "correct": 1, "expl": "Structured interview (pertanyaan sama untuk semua pelamar) lebih valid & reliabel daripada unstructured yang bebas & santai."}, {"chapter": 1, "type": "aplikasi", "q": "Tes mengemudi sebagai simulasi pekerjaan nyata termasuk metode assessment...", "options": ["Biographical inventory", "Work samples", "Tes psikologis", "Wawancara terstruktur"], "correct": 1, "expl": "Work samples = simulasi pekerjaan nyata, contohnya tes mengemudi."}, {"chapter": 1, "type": "recall", "q": "Penilaian beberapa hari berisi simulasi & diskusi kelompok, biasanya untuk posisi manajerial, disebut...", "options": ["Work sample", "Assessment center", "Structured interview", "Biographical inventory"], "correct": 1, "expl": "Assessment center = penilaian beberapa hari (simulasi & diskusi kelompok), biasanya untuk posisi manajerial."}, {"chapter": 1, "type": "recall", "q": "Pemilihan kandidat terbaik berdasarkan hasil assessment disebut...", "options": ["Rekrutmen", "Assessment", "Seleksi", "RJP"], "correct": 2, "expl": "Seleksi = pemilihan kandidat terbaik berdasarkan hasil assessment."}, {"chapter": 1, "type": "recall", "q": "Seleksi yang menggunakan metode terbukti memprediksi performa kerja disebut seleksi...", "options": ["Ilmiah", "Intuitif", "Acak", "Administratif"], "correct": 0, "expl": "Seleksi ilmiah menggunakan metode yang terbukti memprediksi performa kerja."}, {"chapter": 1, "type": "recall", "q": "Berikut termasuk 5 langkah proses validasi seleksi, KECUALI...", "options": ["Job Analysis", "Performance Criteria", "Choose Predictors", "Realistic Job Preview"], "correct": 3, "expl": "5 langkah validasi: Job Analysis, Performance Criteria, Choose Predictors, Validate Predictors, Cross-Validate."}, {"chapter": 1, "type": "analisis", "q": "Strategi seleksi di mana kandidat harus lolos setiap tahap (gagal 1 tahap = gugur) disebut...", "options": ["Regression approach", "Multiple hurdles", "Cross-validation", "Compensatory approach"], "correct": 1, "expl": "Multiple hurdles: kandidat harus lolos tiap tahap; gagal satu = gugur."}, {"chapter": 1, "type": "analisis", "q": "Strategi seleksi di mana semua nilai digabung sehingga nilai tinggi bisa menutupi nilai rendah disebut...", "options": ["Multiple hurdles", "Regression approach", "Multiple cutoff", "Banding"], "correct": 1, "expl": "Regression approach (kompensatori): semua nilai digabung; nilai tinggi pada satu aspek bisa menutupi nilai rendah aspek lain."}, {"chapter": 2, "type": "recall", "q": "Metode untuk mendeskripsikan pekerjaan & apa yang dibutuhkan untuk melaksanakannya disebut...", "options": ["Job evaluation", "Analisis pekerjaan (job analysis)", "Penilaian kinerja", "Rekrutmen"], "correct": 1, "expl": "Analisis pekerjaan = metode mendeskripsikan pekerjaan & kebutuhan untuk melaksanakannya."}, {"chapter": 2, "type": "recall", "q": "Tiga komponen yang dibutuhkan untuk penilaian pekerjaan adalah prosedur sistematik, pembagian aspek menjadi komponen, dan...", "options": ["Laporan tertulis", "Wawancara lisan", "Observasi rahasia", "Survei daring"], "correct": 0, "expl": "Tiga komponen: prosedur harus sistematik, aspek pekerjaan dibagi menjadi komponen, dan laporan tertulis."}, {"chapter": 2, "type": "recall", "q": "Dua cara menilai pekerjaan adalah berdasarkan pekerjaan dan berdasarkan...", "options": ["Gaji", "Individual (karakteristik)", "Lokasi", "Waktu"], "correct": 1, "expl": "Dua cara: berdasarkan pekerjaan (aspek pekerjaan) dan berdasarkan individual (KSAO)."}, {"chapter": 2, "type": "analisis", "q": "Hirarki deskripsi berbasis pekerjaan dari terbesar ke terkecil adalah Position, Duty, Task, Activity, dan...", "options": ["Element", "KSAO", "Skill", "Function"], "correct": 0, "expl": "Hirarki: Position → Duty → Task → Activity → Element."}, {"chapter": 2, "type": "recall", "q": "Deskripsi berbasis karakteristik (KSAO individual) terdiri dari Knowledge, Skill, Ability, dan...", "options": ["Outcome", "Other Personal Characteristics", "Objective", "Operation"], "correct": 1, "expl": "KSAO = Knowledge, Skill, Ability, Other Personal Characteristics."}, {"chapter": 2, "type": "recall", "q": "Sistem informasi berbasis komputer dari Departemen Tenaga Kerja AS yang menyediakan data ±1.100 kelompok pekerjaan disebut...", "options": ["PAQ", "O*NET", "BARS", "RIASEC"], "correct": 1, "expl": "O*NET (Occupational Information Network) menyediakan data tugas & KSAOs untuk ±1.100 kelompok pekerjaan."}, {"chapter": 2, "type": "recall", "q": "Kuesioner berisi 189 item standar untuk menganalisis pekerjaan (input informasi, pengambilan keputusan, output kerja) disebut...", "options": ["O*NET", "Position Analysis Questionnaire (PAQ)", "Task inventory", "BARS"], "correct": 1, "expl": "PAQ = kuesioner 189 item standar; fokus pada input informasi, pengambilan keputusan, output kerja, aktivitas interpersonal & konteks kerja."}, {"chapter": 2, "type": "analisis", "q": "Metode pengumpulan informasi analisis pekerjaan yang paling efisien & dapat diskalakan ke ribuan karyawan adalah...", "options": ["Melakukan pekerjaan sendiri", "Observasi", "Wawancara SMEs", "Kuesioner"], "correct": 3, "expl": "Kuesioner = paling efisien, menjangkau ribuan karyawan, mudah dikuantifikasi. Kelemahan: mengabaikan konteks & rentan dilebih-lebihkan."}, {"chapter": 2, "type": "recall", "q": "Karyawan yang sedang melakukan pekerjaan (job incumbents) & memahami detailnya dianggap sebagai...", "options": ["Job analyst eksternal", "Subject Matter Experts (SMEs)", "Trained observer", "Auditor"], "correct": 1, "expl": "Job incumbents & supervisors yang memahami pekerjaan dianggap sebagai SMEs (Subject Matter Experts)."}, {"chapter": 2, "type": "recall", "q": "Dalam analisis pekerjaan, reliabilitas mengacu pada...", "options": ["Ketepatan isi", "Konsistensi hasil", "Biaya rendah", "Kecepatan pengumpulan"], "correct": 1, "expl": "Reliabilitas = konsistensi hasil (test-retest 0,83; inter-rater 0,73). Validitas = ketepatan isi."}, {"chapter": 2, "type": "recall", "q": "Teknik kuantitatif untuk menentukan gaji relatif antar pekerjaan dengan menentukan faktor kompensasi & memberi skor disebut...", "options": ["Comparable worth", "Point method (job evaluation)", "Task inventory", "Realistic Job Preview"], "correct": 1, "expl": "Point method (job evaluation): menentukan faktor kompensasi, memberi skor, lalu menjumlahkan untuk menetapkan gaji relatif."}, {"chapter": 2, "type": "analisis", "q": "Konsep bahwa pekerjaan berbeda tetapi kontribusinya setara harus dibayar sama (penting untuk mengurangi kesenjangan gender) disebut...", "options": ["Internal equity", "Comparable worth", "Merit pay", "Point method"], "correct": 1, "expl": "Comparable worth = pekerjaan berbeda dengan kontribusi setara harus dibayar sama; mengurangi kesenjangan gender."}, {"chapter": 2, "type": "aplikasi", "q": "Seorang HR memakai hasil analisis pekerjaan untuk menentukan karakteristik yang dibutuhkan agar dapat menyaring pelamar. Fungsi analisis pekerjaan ini adalah...", "options": ["Seleksi", "Menentukan gaji", "Latihan", "Klasifikasi"], "correct": 0, "expl": "Fungsi seleksi: analisis pekerjaan membantu mendeskripsikan karakteristik (KSAO) yang dibutuhkan untuk menyaring pelamar."}, {"chapter": 3, "type": "recall", "q": "Proses mengevaluasi kualitas kerja karyawan untuk menilai seberapa efektif kinerjanya disebut...", "options": ["Job analysis", "Appraisal (penilaian jabatan)", "Recruitment", "Job evaluation"], "correct": 1, "expl": "Appraisal = proses mengevaluasi kualitas & efektivitas kinerja karyawan."}, {"chapter": 3, "type": "recall", "q": "Kebijakan kenaikan/penurunan gaji & promosi yang didasarkan pada seberapa memuaskan kinerja karyawan disebut...", "options": ["Base pay", "Merit pay", "Hygiene pay", "Comparable worth"], "correct": 1, "expl": "Merit pay = keputusan administratif (gaji/promosi) berdasarkan tingkat kepuasan terhadap kinerja."}, {"chapter": 3, "type": "recall", "q": "Salah satu tujuan appraisal adalah memberi umpan balik, yang biasanya dilakukan melalui...", "options": ["Tes psikologis", "Appraisal interview", "Iklan lowongan", "Work sample"], "correct": 1, "expl": "Appraisal sering berfungsi sebagai feedback, biasanya lewat appraisal interview (evaluasi performa, perencanaan pengembangan, dll.)."}, {"chapter": 3, "type": "analisis", "q": "Sales mobil dinilai dari kemampuan membujuk orang membeli (kriteria teoritis); hal ini diukur lewat jumlah penjualan mobil, yang merupakan kriteria...", "options": ["Teoritis", "Aktual", "Kontaminasi", "Relevansi"], "correct": 1, "expl": "Kriteria teoritis = definisi umum (kemampuan membujuk). Kriteria aktual = cara mengukurnya secara valid (jumlah penjualan)."}, {"chapter": 3, "type": "recall", "q": "Ketidakcukupan suatu kriteria untuk menilai kinerja secara memadai disebut...", "options": ["Criterion contamination", "Criterion deficiency", "Criterion relevance", "Criterion complexity"], "correct": 1, "expl": "Criterion deficiency = ketidakcukupan kriteria untuk menilai kinerja. Criterion relevance = kriteria memenuhi apa yang seharusnya dinilai."}, {"chapter": 3, "type": "recall", "q": "Ketika sebuah kriteria tidak mengukur apa yang seharusnya diukur, terjadi...", "options": ["Criterion deficiency", "Criterion contamination", "Criterion relevance", "OCB"], "correct": 1, "expl": "Criterion contamination = kriteria tidak mengukur apa yang seharusnya diukur (mengukur hal yang salah/tak relevan)."}, {"chapter": 3, "type": "analisis", "q": "Penjualan tinggi tetapi kepuasan pelanggan rendah menunjukkan kinerja tidak lengkap. Hal ini menegaskan bahwa kriteria bersifat...", "options": ["Satu dimensi", "Multidimensional", "Statis", "Subjektif murni"], "correct": 1, "expl": "Kriteria bersifat multidimensional (kuantitas, kualitas, perilaku kontekstual), sehingga satu indikator tidak cukup."}, {"chapter": 3, "type": "recall", "q": "Pengukuran berbasis penjualan yang kuantitatif tetapi bisa terkontaminasi/tidak akurat termasuk pengukuran...", "options": ["Objektif", "Subjektif", "Teoritis", "Kontekstual"], "correct": 0, "expl": "Objective measures (cth: penjualan) bersifat kuantitatif namun bisa tidak akurat/terkontaminasi. Subjective = rating atasan/rekan."}, {"chapter": 3, "type": "recall", "q": "Perilaku seperti membantu rekan kerja, berinisiatif, & menjaga lingkungan kerja positif disebut...", "options": ["Merit behavior", "Organizational Citizenship Behavior (OCB)", "Halo behavior", "Counterproductive behavior"], "correct": 1, "expl": "OCB = perilaku di luar tugas formal (membantu rekan, inisiatif) yang krusial bagi efektivitas organisasi."}, {"chapter": 3, "type": "recall", "q": "Skala penilaian subjektif yang mengaitkan setiap skor dengan contoh perilaku konkret disebut...", "options": ["Graphic rating scale", "BARS", "Point method", "Realistic Job Preview"], "correct": 1, "expl": "BARS (Behaviorally Anchored Rating Scales) mengaitkan tiap skor dengan contoh perilaku nyata sebagai acuan penilai."}, {"chapter": 3, "type": "aplikasi", "q": "Seorang penilai memberi skor tinggi pada semua dimensi karena terkesan satu sifat baik karyawan. Bias ini disebut...", "options": ["Leniency", "Halo effect", "Central tendency", "Severity"], "correct": 1, "expl": "Halo effect = satu kesan umum mewarnai penilaian semua dimensi. Bias lain: leniency/severity, central tendency, stereotypes."}, {"chapter": 3, "type": "recall", "q": "Pelatihan penilai dengan contoh konkret agar semua penilai memiliki referensi yang sama disebut...", "options": ["Rater Error Training (RET)", "Frame-of-Reference Training (FOR)", "Calibration meeting", "360-degree feedback"], "correct": 1, "expl": "Frame-of-Reference Training memberi contoh konkret per dimensi sehingga penilai punya acuan bersama; lebih menjanjikan untuk akurasi."}, {"chapter": 3, "type": "recall", "q": "Penilaian yang menggabungkan rating dari atasan, rekan, bawahan, & diri sendiri disebut...", "options": ["Graphic rating", "360-degree feedback", "BARS", "Merit pay"], "correct": 1, "expl": "360-degree feedback menggabungkan rating dari atasan, rekan, bawahan, & diri sendiri untuk mengurangi bias satu penilai."}, {"chapter": 3, "type": "analisis", "q": "Masalah utama Rater Error Training (RET) adalah...", "options": ["Terlalu mahal untuk diterapkan", "Mengurangi error tetapi juga menurunkan akurasi", "Tidak bisa diterapkan ke manajer", "Membutuhkan komputer"], "correct": 1, "expl": "RET mengurangi error namun memaksa variasi yang tak mencerminkan kinerja sebenarnya, sehingga menurunkan akurasi."}, {"chapter": 3, "type": "analisis", "q": "Organisasi yang menggunakan banyak penilai (multiple raters) hanya kalah 11% kasus pengadilan dibanding 41% secara keseluruhan. Ini menunjukkan multiple raters...", "options": ["Meningkatkan bias", "Lebih dapat dipertahankan secara hukum", "Memperlambat proses tanpa manfaat", "Tidak relevan dengan hukum"], "correct": 1, "expl": "Penggunaan banyak penilai membuat sistem appraisal lebih defensible secara hukum (kalah hanya 11% vs 41% kasus)."}, {"chapter": 4, "type": "recall", "q": "Dorongan yang membangkitkan, mengarahkan, & mempertahankan perilaku manusia untuk mencapai tujuan disebut...", "options": ["Emosi", "Motivasi", "Persepsi", "Kognisi"], "correct": 1, "expl": "Motivasi = dorongan yang membangkitkan, mengarahkan, & mempertahankan perilaku; menentukan arah, intensitas, & ketekunan."}, {"chapter": 4, "type": "recall", "q": "Tiga aspek motivasi (Direction, Intensity, Persistence) menjawab: apa yang dilakukan, seberapa keras berusaha, dan...", "options": ["Kapan harus berhenti", "Haruskah terus maju melakukannya (ketekunan)", "Siapa yang membantu", "Di mana bekerja"], "correct": 1, "expl": "Direction (apa yang dilakukan), Intensity (seberapa keras), Persistence (haruskah terus maju)."}, {"chapter": 4, "type": "analisis", "q": "Tujuan abstrak yang bernilai tinggi namun membutuhkan waktu lama untuk tercapai disebut motivasi...", "options": ["Proksimal", "Distal", "Hygiene", "Ekstrinsik"], "correct": 1, "expl": "Motivasi distal = tujuan abstrak bernilai tinggi, probabilitas tercapai butuh waktu lama. Proksimal = langkah kecil/tugas harian."}, {"chapter": 4, "type": "recall", "q": "Keyakinan akan kemampuan diri menyelesaikan suatu tugas yang meningkatkan motivasi (Bandura, 1982) disebut...", "options": ["Self-esteem", "Self-efficacy", "Self-regulation", "Locus of control"], "correct": 1, "expl": "Self-efficacy = kepercayaan pada kemampuan diri menyelesaikan tugas; semakin kuat, semakin tinggi motivasi."}, {"chapter": 4, "type": "aplikasi", "q": "Kadet angkatan laut yang diberi tahu kecil kemungkinan mabuk laut ternyata lebih sedikit sakit & berkinerja lebih baik (Eden & Zuk, 1995). Ini contoh...", "options": ["Hawthorne effect", "Galatea effect", "Halo effect", "Placebo murni"], "correct": 1, "expl": "Galatea effect = self-fulfilling prophecy pribadi; keyakinan diri yang ditingkatkan memperbaiki kinerja & mengurangi sakit."}, {"chapter": 4, "type": "recall", "q": "Teori yang berfokus pada feedback kinerja masa lalu & penyesuaian perilaku untuk mencapai tujuan disebut...", "options": ["Action theory", "Control theory", "Equity theory", "Expectancy theory"], "correct": 1, "expl": "Control theory berfokus pada umpan balik kinerja masa lalu & pengaturan perilaku untuk mencapai tujuan."}, {"chapter": 4, "type": "recall", "q": "Menurut Herzberg, gaji & kebijakan organisasi termasuk hygiene factor, sedangkan prestasi & pengakuan termasuk...", "options": ["Hygiene factor", "Motivator factor", "Valence", "Input"], "correct": 1, "expl": "Motivator factor = prestasi, pengakuan, tanggung jawab, sifat pekerjaan. Hygiene factor = gaji, pengawasan, rekan, kebijakan."}, {"chapter": 4, "type": "analisis", "q": "Menurut teori dua faktor Herzberg, kepuasan & ketidakpuasan kerja adalah...", "options": ["Dua ujung berlawanan dari satu garis kontinu", "Dua hal terpisah yang tidak saling berhubungan", "Hal yang persis sama", "Selalu berbanding lurus"], "correct": 1, "expl": "Herzberg: satisfaction & dissatisfaction adalah dua hal terpisah, bukan dua ujung dari satu garis kontinu yang sama."}, {"chapter": 4, "type": "recall", "q": "Rumus Force (kekuatan motivasi) dalam Expectancy Theory Vroom adalah...", "options": ["Force = Expectancy + Valence + Instrumentality", "Force = Expectancy × Σ(Valence × Instrumentality)", "Force = Valence − Instrumentality", "Force = Expectancy ÷ Valence"], "correct": 1, "expl": "Force = Expectancy × Σ(Valence × Instrumentality)."}, {"chapter": 4, "type": "analisis", "q": "Dalam Expectancy Theory, jika salah satu komponen bernilai nol (0), maka motivasi (Force)...", "options": ["Tetap tinggi", "Menjadi nol", "Tidak terpengaruh", "Menjadi negatif"], "correct": 1, "expl": "Aturan mutlak: semua komponen harus bernilai tinggi; jika satu bernilai 0, maka Force = 0."}, {"chapter": 4, "type": "recall", "q": "Seberapa besar seseorang menginginkan suatu hadiah/hasil disebut...", "options": ["Expectancy", "Instrumentality", "Valence", "Force"], "correct": 2, "expl": "Valence (valensi) = seberapa besar seseorang menginginkan hadiah tersebut."}, {"chapter": 4, "type": "recall", "q": "Keyakinan bahwa jika tugas selesai maka hadiah pasti diberikan disebut...", "options": ["Expectancy", "Instrumentality", "Valence", "Persistence"], "correct": 1, "expl": "Instrumentality = keyakinan bahwa menyelesaikan tugas pasti menghasilkan hadiah tertentu."}, {"chapter": 4, "type": "recall", "q": "Menurut Locke, target yang spesifik & menantang jauh lebih baik daripada kalimat samar seperti...", "options": ["'Selesaikan tepat waktu'", "'Lakukan saja yang terbaik'", "'Capai target penjualan'", "'Tingkatkan 10%'"], "correct": 1, "expl": "Goal-Setting Theory: specific hard goals lebih baik daripada 'lakukan saja yang terbaik' (do your best)."}, {"chapter": 4, "type": "analisis", "q": "Menurut Goal-Setting Theory, tujuan akan lebih efektif jika...", "options": ["Dipaksakan oleh organisasi", "Ditetapkan sendiri oleh karyawan (self-set)", "Bersifat samar & umum", "Diberikan tanpa feedback"], "correct": 1, "expl": "Self-set goals lebih efektif daripada yang dipaksakan; dibutuhkan juga goal commitment, feedback, & difficult goals."}, {"chapter": 4, "type": "recall", "q": "Teori yang menyatakan orang membandingkan rasio outcome/input mereka dengan orang lain (Adams, 1965) disebut...", "options": ["Equity Theory", "Need Hierarchy Theory", "Control Theory", "Action Theory"], "correct": 0, "expl": "Equity Theory (Adams, 1965): orang termotivasi mencapai keadilan dengan membandingkan rasio outcome/input mereka vs orang lain."}, {"chapter": 4, "type": "recall", "q": "Dalam Equity Theory, gaji, tunjangan, & status yang diperoleh karyawan dari bekerja disebut...", "options": ["Input", "Outcome", "Valence", "Effort"], "correct": 1, "expl": "Outcome = imbalan bernilai pribadi dari bekerja (gaji, tunjangan, status). Input = kontribusi (pekerjaan, pengalaman, bakat)."}, {"chapter": 4, "type": "analisis", "q": "Keadilan yang berkaitan dengan keadilan PROSES alokasi imbalan (bukan distribusinya) disebut keadilan...", "options": ["Distributif", "Prosedural", "Interaksional", "Komparatif"], "correct": 1, "expl": "Fairness Theory membedakan keadilan distributif (hasil/alokasi) dari keadilan prosedural (proses pengalokasian imbalan)."}];
+const FLASHCARDS = [{"chapter": 1, "term": "Tahapan Mendapatkan Karyawan", "def": "Rekrutmen (mencari pelamar) → Assessment (menilai kemampuan) → Seleksi (memilih terbaik)."}, {"chapter": 1, "term": "Rekrutmen", "def": "Proses menarik kandidat untuk melamar, fokus mencari kandidat sesuai dengan memperhatikan KSAOs."}, {"chapter": 1, "term": "Realistic Job Preview (RJP)", "def": "Gambaran jujur (positif & negatif) pekerjaan; mengurangi turnover awal & membantu menilai kecocokan."}, {"chapter": 1, "term": "Jenis Assessment", "def": "Tes psikologis, biographical inventories, wawancara, work samples, assessment centers."}, {"chapter": 1, "term": "Structured vs Unstructured Interview", "def": "Structured (pertanyaan sama untuk semua) lebih valid & reliabel; unstructured bebas & santai."}, {"chapter": 1, "term": "Assessment Center", "def": "Penilaian beberapa hari berisi simulasi & diskusi kelompok; biasanya untuk posisi manajerial."}, {"chapter": 1, "term": "Validasi Seleksi 5 Langkah", "def": "Job Analysis → Performance Criteria → Choose Predictors → Validate Predictors → Cross-Validate."}, {"chapter": 1, "term": "Multiple Hurdles vs Regression", "def": "Multiple hurdles: lolos tiap tahap (gagal 1 = gugur). Regression: nilai digabung, tinggi menutupi rendah."}, {"chapter": 2, "term": "Analisis Pekerjaan", "def": "Metode mendeskripsikan pekerjaan & kebutuhannya. 3 komponen: prosedur sistematik, pembagian aspek, laporan tertulis."}, {"chapter": 2, "term": "Hirarki Berbasis Pekerjaan", "def": "Position → Duty → Task → Activity → Element."}, {"chapter": 2, "term": "KSAO", "def": "Knowledge, Skill, Ability, Other Personal Characteristics — dasar deskripsi berbasis karakteristik individual."}, {"chapter": 2, "term": "O*NET", "def": "Occupational Information Network (Dep. Tenaga Kerja AS); data tugas & KSAOs ±1.100 kelompok pekerjaan."}, {"chapter": 2, "term": "PAQ", "def": "Position Analysis Questionnaire — 189 item standar; fokus input informasi, keputusan, output kerja, interpersonal, konteks."}, {"chapter": 2, "term": "Reliabilitas vs Validitas (Job Analysis)", "def": "Reliabilitas = konsistensi (test-retest 0,83). Validitas = ketepatan isi; lebih akurat untuk tugas spesifik."}, {"chapter": 2, "term": "Job Evaluation (Point Method)", "def": "Teknik kuantitatif gaji relatif: tentukan faktor kompensasi, beri skor, jumlahkan, bandingkan dengan gaji aktual."}, {"chapter": 2, "term": "Comparable Worth", "def": "Pekerjaan berbeda dengan kontribusi setara harus dibayar sama; penting mengurangi kesenjangan gender."}, {"chapter": 3, "term": "Appraisal", "def": "Proses mengevaluasi kualitas & efektivitas kerja karyawan; untuk keputusan administratif, feedback, & riset."}, {"chapter": 3, "term": "Merit Pay", "def": "Keputusan administratif (gaji/promosi) berdasarkan seberapa memuaskan kinerja karyawan."}, {"chapter": 3, "term": "Theoretical vs Actual Criterion", "def": "Teoritis = definisi umum kinerja baik. Aktual = cara mengukurnya secara valid (cth: jumlah penjualan)."}, {"chapter": 3, "term": "Criterion Deficiency vs Contamination", "def": "Deficiency = kriteria tak cukup menilai kinerja. Contamination = kriteria mengukur hal yang salah/tak relevan."}, {"chapter": 3, "term": "OCB", "def": "Organizational Citizenship Behavior — membantu rekan, inisiatif, jaga lingkungan positif; krusial bagi efektivitas organisasi."}, {"chapter": 3, "term": "BARS", "def": "Behaviorally Anchored Rating Scales — tiap skor dikaitkan dengan contoh perilaku konkret sebagai acuan penilai."}, {"chapter": 3, "term": "Bias Penilai", "def": "Halo effect, leniency/severity, central tendency, stereotypes — dua orang berkinerja sama bisa dapat skor berbeda."}, {"chapter": 3, "term": "Frame-of-Reference Training", "def": "Melatih penilai dengan contoh konkret per dimensi agar punya referensi sama; lebih menjanjikan untuk akurasi."}, {"chapter": 3, "term": "360-Degree Feedback", "def": "Gabungan rating atasan, rekan, bawahan, & diri sendiri; mengurangi bias satu penilai."}, {"chapter": 4, "term": "Motivasi (3 aspek)", "def": "Direction (apa), Intensity (seberapa keras), Persistence (haruskah terus maju)."}, {"chapter": 4, "term": "Motivasi Distal vs Proksimal", "def": "Distal = tujuan abstrak jangka panjang. Proksimal = langkah kecil/tugas harian spesifik."}, {"chapter": 4, "term": "Self-Efficacy & Galatea Effect", "def": "Keyakinan pada kemampuan diri (Bandura). Galatea effect = self-fulfilling prophecy meningkatkan kinerja."}, {"chapter": 4, "term": "Two-Factor (Herzberg)", "def": "Hygiene (gaji, pengawasan, kebijakan) cegah ketidakpuasan; Motivator (prestasi, pengakuan) dorong kepuasan. Keduanya terpisah."}, {"chapter": 4, "term": "Expectancy Theory (Vroom)", "def": "Force = Expectancy × Σ(Valence × Instrumentality). Jika satu komponen 0, Force = 0."}, {"chapter": 4, "term": "Goal-Setting (Locke)", "def": "Specific hard goals > 'lakukan yang terbaik'. Efektif jika self-set + goal commitment + feedback."}, {"chapter": 4, "term": "Equity Theory (Adams)", "def": "Orang membandingkan rasio outcome/input dengan orang lain & termotivasi mencapai keadilan."}, {"chapter": 4, "term": "Fairness Theory", "def": "Membedakan keadilan distributif (hasil) & prosedural (proses alokasi imbalan)."}];
+const MATCH_SETS = [{"title": "Rekrutmen & Seleksi", "pairs": [["Rekrutmen", "Menarik kandidat untuk melamar"], ["Assessment", "Menilai kemampuan & kecocokan"], ["Seleksi", "Memilih kandidat terbaik"], ["RJP", "Gambaran jujur untuk kurangi turnover"], ["Work sample", "Simulasi nyata (cth: tes menyetir)"], ["Assessment center", "Simulasi & diskusi untuk manajerial"], ["Multiple hurdles", "Gagal 1 tahap = gugur"], ["Regression approach", "Nilai digabung, tinggi tutupi rendah"]]}, {"title": "Analisis Pekerjaan", "pairs": [["Job analysis", "Mendeskripsikan pekerjaan & kebutuhannya"], ["KSAO", "Knowledge, Skill, Ability, Other"], ["Hirarki pekerjaan", "Position-Duty-Task-Activity-Element"], ["O*NET", "Database ±1.100 pekerjaan (Dep. TK AS)"], ["PAQ", "Kuesioner 189 item standar"], ["Kuesioner", "Metode paling efisien & terskala"], ["Point method", "Job evaluation kuantitatif gaji"], ["Comparable worth", "Kontribusi setara dibayar sama"]]}, {"title": "Appraisal & Motivasi", "pairs": [["Merit pay", "Gaji/promosi berdasar kinerja"], ["Criterion contamination", "Mengukur hal yang salah"], ["BARS", "Skor berlabel perilaku konkret"], ["360-degree feedback", "Rating atasan, rekan, bawahan, diri"], ["Herzberg", "Hygiene vs motivator factors"], ["Vroom", "Force = E × Σ(V × I)"], ["Locke", "Specific hard goals"], ["Adams", "Equity: rasio outcome/input"]]}];
+const CHAPTER_NAMES = {"1": "Rekrutmen, Assessment & Seleksi", "2": "Analisis Pekerjaan & Job Evaluation", "3": "Penilaian Jabatan (Appraisal)", "4": "Motivasi Kerja"};
+function chapLabel(c){ if(CHAPTER_NAMES&&CHAPTER_NAMES[c]!==undefined)return CHAPTER_NAMES[c]; if(CHAPTER_NAMES&&CHAPTER_NAMES[String(c)]!==undefined)return CHAPTER_NAMES[String(c)]; return 'Bab '+c; }
+let activeQuestions=[], answered={}, fcDeck=[], fcIdx=0, fcKnown=new Set(), fcUnknown=new Set();
+let matchState={left:[],right:[],matched:{},set:0,selectedLeft:null,selectedRight:null};
+
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.tab[onclick*="'+name+'"]').classList.add('active');
+  document.getElementById(name).classList.add('active');
+  if(name==='fc' && fcDeck.length===0) resetFlashcards();
+  if(name==='match' && matchState.left.length===0) loadMatch(0);
+}
+function populateFilters(){
+  const chapters=[...new Set(QUESTIONS.map(q=>q.chapter))].sort((a,b)=>a-b);
+  const fcChapters=[...new Set(FLASHCARDS.map(c=>c.chapter))].sort((a,b)=>a-b);
+  const filter=document.getElementById('chapterFilter'), fcFilter=document.getElementById('fcChapterFilter');
+  chapters.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=chapLabel(c);filter.appendChild(o);});
+  fcChapters.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=chapLabel(c);fcFilter.appendChild(o);});
+}
+function renderQuestions(){
+  const ch=document.getElementById('chapterFilter').value, tp=document.getElementById('typeFilter').value;
+  activeQuestions=QUESTIONS.filter(q=>(ch==='all'||q.chapter==ch)&&(tp==='all'||q.type===tp));
+  const container=document.getElementById('questionList');container.innerHTML='';
+  activeQuestions.forEach((q,i)=>{
+    const div=document.createElement('div');div.className='question';
+    const qid=q.chapter+'_'+q.q.substring(0,30);
+    div.innerHTML='<div class="meta"><span class="pill">'+chapLabel(q.chapter)+'</span>'+
+      '<span class="pill '+q.type+'">'+q.type.toUpperCase()+'</span>'+
+      '<span style="color:var(--muted);font-size:.82em">Soal #'+(i+1)+'</span></div>'+
+      '<div class="qtext">'+q.q+'</div><div class="options">'+
+      q.options.map((opt,j)=>'<div class="option" onclick="selectOption(this,\''+qid+'\','+j+','+q.correct+')">'+
+        '<span class="letter">'+String.fromCharCode(65+j)+'</span><span>'+opt+'</span></div>').join('')+
+      '</div><div class="explanation"><strong>💡 Penjelasan:</strong> '+q.expl+'</div>';
+    container.appendChild(div);
+  });
+  updateMCStats();document.getElementById('mcSummary').classList.remove('show');
+}
+function selectOption(el,qid,idx,correct){
+  if(answered[qid]!==undefined)return;
+  const allOpts=el.parentElement.querySelectorAll('.option');
+  allOpts.forEach((o,i)=>{o.classList.remove('selected');if(i===correct)o.classList.add('correct');if(i===idx&&idx!==correct)o.classList.add('wrong');});
+  el.classList.add('selected');
+  el.parentElement.parentElement.querySelector('.explanation').classList.add('show');
+  answered[qid]=(idx===correct);updateMCStats();
+}
+function updateMCStats(){
+  const total=activeQuestions.length;
+  const keys=Object.keys(answered).filter(k=>activeQuestions.some(q=>(q.chapter+'_'+q.q.substring(0,30))===k));
+  const ans=keys.length, correct=keys.filter(k=>answered[k]).length;
+  document.getElementById('mcStats').textContent=correct+'/'+ans+' benar ('+total+' total)';
+  if(ans===total&&total>0) showSummary(correct,total);
+}
+function showSummary(correct,total){
+  const pct=Math.round(correct/total*100);
+  let cls='bad',v='Perlu belajar lagi — ulang & coba lagi!';
+  if(pct>=80){cls='good';v='Sangat siap! 🎓';}else if(pct>=60){cls='medium';v='Hampir siap — fokus ke yang salah!';}
+  const s=document.getElementById('mcSummary');s.className='summary show '+cls;
+  s.innerHTML='<div style="font-size:.92em;color:var(--muted)">SKOR AKHIR</div><div class="score">'+pct+'%</div>'+
+    '<div class="verdict">'+v+'</div><div style="margin-top:10px">Benar <strong>'+correct+'</strong> dari <strong>'+total+'</strong>.</div>'+
+    '<button class="qbtn" style="margin-top:14px" onclick="resetMC()">Ulangi</button>';
+}
+function resetMC(){answered={};renderQuestions();}
+function shuffleMC(){for(let i=QUESTIONS.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[QUESTIONS[i],QUESTIONS[j]]=[QUESTIONS[j],QUESTIONS[i]];}renderQuestions();}
+function resetFlashcards(){
+  const ch=document.getElementById('fcChapterFilter').value;
+  fcDeck=FLASHCARDS.filter(c=>ch==='all'||c.chapter==ch);
+  fcIdx=0;fcKnown=new Set();fcUnknown=new Set();showCard();updateFCStats();
+}
+function showCard(){
+  if(fcDeck.length===0){document.getElementById('fcTerm').textContent='Tidak ada kartu';document.getElementById('fcDef').textContent='—';document.getElementById('fcMeta').textContent='—';document.getElementById('fcProgress').textContent='0 / 0';return;}
+  const c=fcDeck[fcIdx];
+  document.getElementById('fcTerm').textContent=c.term;document.getElementById('fcDef').textContent=c.def;
+  document.getElementById('fcMeta').textContent=chapLabel(c.chapter);
+  document.getElementById('fcProgress').textContent=(fcIdx+1)+' / '+fcDeck.length;
+  document.getElementById('flashcard').classList.remove('flipped');
+}
+function flipCard(){document.getElementById('flashcard').classList.toggle('flipped');}
+function nextCard(){if(fcDeck.length===0)return;fcIdx=(fcIdx+1)%fcDeck.length;showCard();}
+function prevCard(){if(fcDeck.length===0)return;fcIdx=(fcIdx-1+fcDeck.length)%fcDeck.length;showCard();}
+function markCard(k){if(fcDeck.length===0)return;const t=fcDeck[fcIdx].term;if(k){fcKnown.add(t);fcUnknown.delete(t);}else{fcUnknown.add(t);fcKnown.delete(t);}updateFCStats();nextCard();}
+function updateFCStats(){document.getElementById('fcKnow').textContent=fcKnown.size;document.getElementById('fcDontKnow').textContent=fcUnknown.size;}
+function shuffleFlashcards(){for(let i=fcDeck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[fcDeck[i],fcDeck[j]]=[fcDeck[j],fcDeck[i]];}fcIdx=0;showCard();}
+function buildMatchControls(){
+  const c=document.getElementById('matchControls');c.innerHTML='';
+  MATCH_SETS.forEach((s,i)=>{const b=document.createElement('button');b.textContent='Set '+(i+1)+': '+s.title;b.onclick=()=>loadMatch(i);c.appendChild(b);});
+  const sp=document.createElement('span');sp.className='stats';sp.id='matchStats';sp.textContent='— / —';c.appendChild(sp);
+}
+function loadMatch(idx){
+  matchState.set=idx;matchState.matched={};
+  const set=MATCH_SETS[idx];
+  const left=set.pairs.map((p,i)=>({id:i,text:p[0]}));
+  const right=set.pairs.map((p,i)=>({id:i,text:p[1]}));
+  for(let i=right.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[right[i],right[j]]=[right[j],right[i]];}
+  matchState.left=left;matchState.right=right;matchState.selectedLeft=null;matchState.selectedRight=null;renderMatch();
+}
+function renderMatch(){
+  const lc=document.getElementById('matchLeft'),rc=document.getElementById('matchRight');
+  lc.innerHTML='<h3 style="margin:0 0 10px;color:var(--primary)">Konsep / Tokoh</h3>';
+  rc.innerHTML='<h3 style="margin:0 0 10px;color:var(--primary)">Pasangan</h3>';
+  matchState.left.forEach(item=>{
+    const matched=matchState.matched[item.id]!==undefined, correct=matchState.matched[item.id]===item.id;
+    const d=document.createElement('div');d.className='option';d.style.marginBottom='6px';
+    if(matched&&correct)d.classList.add('correct');if(matched&&!correct)d.classList.add('wrong');
+    if(matchState.selectedLeft===item.id)d.classList.add('selected');
+    d.textContent=item.text;d.onclick=()=>selectLeft(item.id);lc.appendChild(d);
+  });
+  matchState.right.forEach(item=>{
+    const used=Object.values(matchState.matched).includes(item.id);
+    const d=document.createElement('div');d.className='option';d.style.marginBottom='6px';
+    if(used)d.style.opacity='0.4';if(matchState.selectedRight===item.id)d.classList.add('selected');
+    d.textContent=item.text;d.onclick=()=>selectRight(item.id);rc.appendChild(d);
+  });
+  const total=matchState.left.length, matched=Object.keys(matchState.matched).length;
+  const correct=Object.entries(matchState.matched).filter(([k,v])=>k==v).length;
+  const st=document.getElementById('matchStats');if(st)st.textContent=correct+'/'+matched+' benar ('+total+' total)';
+}
+function selectLeft(id){if(matchState.matched[id]!==undefined)return;matchState.selectedLeft=id;if(matchState.selectedRight!==null)tryMatch();renderMatch();}
+function selectRight(id){if(Object.values(matchState.matched).includes(id))return;matchState.selectedRight=id;if(matchState.selectedLeft!==null)tryMatch();renderMatch();}
+function tryMatch(){matchState.matched[matchState.selectedLeft]=matchState.selectedRight;matchState.selectedLeft=null;matchState.selectedRight=null;}
+function checkMatch(){alert('HIJAU = benar, MERAH = salah. Ketuk konsep di kiri lalu pasangannya di kanan!');}
+function resetMatch(){loadMatch(matchState.set);}
+populateFilters();renderQuestions();buildMatchControls();
+</script>
+</body>
+</html>

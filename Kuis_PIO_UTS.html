@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis Interaktif — PIO UTS</title>
+<style>
+:root{
+  --primary:#1B3A5B;--secondary:#2E6171;--accent:#DCE8E8;--highlight:#F4A261;
+  --bg:#F4F7F8;--bgDark:#102331;--text:#202234;--muted:#7E83A0;--good:#2E7D5B;--bad:#C84A4A;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:0;font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Calibri,sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.55;-webkit-text-size-adjust:100%}
+.hero{background:linear-gradient(135deg,var(--bgDark) 0%,var(--primary) 100%);color:#fff;padding:44px 18px 30px;text-align:center}
+.hero h1{font-family:Georgia,serif;font-size:2.2em;margin:0 0 6px}
+.hero p{opacity:.85;margin:4px 0;font-size:.95em}
+.tabs{display:flex;justify-content:center;gap:8px;background:#fff;padding:13px;border-bottom:2px solid var(--accent);
+  position:sticky;top:0;z-index:50;flex-wrap:wrap}
+.tab{padding:10px 18px;background:var(--accent);color:var(--primary);border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:.92em;transition:all .2s}
+.tab.active{background:var(--primary);color:#fff}
+.tab:hover:not(.active){background:var(--secondary);color:#fff}
+.container{max-width:920px;margin:0 auto;padding:26px 18px}
+.panel{display:none}.panel.active{display:block}
+.controls{background:#fff;padding:14px;border-radius:10px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.controls label{font-size:.88em;font-weight:600;color:var(--muted)}
+.controls select{padding:6px 10px;border:1px solid var(--accent);border-radius:6px;background:var(--bg);font-size:.88em}
+.controls button{padding:8px 15px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:.88em}
+.controls button:hover{background:var(--bgDark)}
+.controls .stats{margin-left:auto;font-weight:700;color:var(--primary);font-size:.9em}
+.question{background:#fff;border-radius:12px;padding:20px;margin:18px 0;box-shadow:0 2px 12px rgba(0,0,0,.06);border-left:6px solid var(--primary)}
+.question .meta{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.question .meta .pill{padding:2px 10px;background:var(--accent);color:var(--primary);border-radius:999px;font-size:.72em;font-weight:700}
+.question .meta .pill.recall{background:#D9EAD3;color:#2E7D5B}
+.question .meta .pill.aplikasi{background:#FCE5CD;color:#B8723D}
+.question .meta .pill.analisis{background:#F4CCCC;color:#C84A4A}
+.question .qtext{font-size:1.06em;font-weight:600;margin-bottom:13px}
+.options{display:flex;flex-direction:column;gap:8px}
+.option{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;background:var(--bg);border:2px solid var(--accent);border-radius:8px;cursor:pointer;transition:all .15s;font-size:.95em}
+.option:hover{border-color:var(--secondary)}
+.option.selected{border-color:var(--primary);background:#EFEDF8}
+.option.correct{border-color:var(--good);background:#E8F5EC}
+.option.wrong{border-color:var(--bad);background:#FCE9E9}
+.option .letter{display:inline-block;width:25px;height:25px;border-radius:50%;background:var(--secondary);color:#fff;text-align:center;line-height:25px;font-weight:700;font-size:.82em;flex-shrink:0}
+.option.selected .letter{background:var(--primary)}.option.correct .letter{background:var(--good)}.option.wrong .letter{background:var(--bad)}
+.explanation{margin-top:13px;padding:11px 13px;background:#FFF8E6;border-left:4px solid var(--highlight);border-radius:6px;font-size:.92em;display:none}
+.explanation.show{display:block}.explanation strong{color:#B8723D}
+.qbtn{display:inline-block;margin-top:12px;padding:8px 16px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600}
+.flashcard-wrapper{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:18px}
+.flashcard{width:100%;max-width:600px;height:260px;perspective:1500px;cursor:pointer}
+.flashcard-inner{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}
+.flashcard.flipped .flashcard-inner{transform:rotateY(180deg)}
+.flashcard-front,.flashcard-back{position:absolute;width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;padding:26px;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.1);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.flashcard-front{background:linear-gradient(135deg,var(--primary),var(--bgDark));color:#fff}
+.flashcard-back{background:linear-gradient(135deg,var(--accent),#fff);color:var(--text);transform:rotateY(180deg);font-size:.93em;line-height:1.55;flex-direction:column}
+.flashcard-front .term{font-size:1.5em;font-weight:700;font-family:Georgia,serif}
+.flashcard-front .hint{position:absolute;bottom:12px;left:0;right:0;font-size:.72em;opacity:.6;font-style:italic}
+.fc-meta{position:absolute;top:12px;left:12px;font-size:.7em;padding:2px 10px;background:rgba(255,255,255,.2);color:#fff;border-radius:999px;max-width:75%}
+.fc-controls{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
+.fc-controls button{padding:10px 18px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:.92em}
+.fc-controls button.alt{background:var(--secondary)}.fc-controls button.acc{background:var(--good)}.fc-controls button.bad{background:var(--bad)}
+.fc-controls .progress{font-weight:700;color:var(--primary)}
+.fc-stats{display:flex;gap:22px;justify-content:center;font-size:.92em;color:var(--muted);margin-top:6px}
+.fc-stats .know{color:var(--good);font-weight:700}.fc-stats .dontknow{color:var(--bad);font-weight:700}
+.summary{background:#fff;border-radius:12px;padding:26px;margin-top:22px;text-align:center;display:none;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.summary.show{display:block}
+.summary .score{font-size:3.6em;font-weight:700;font-family:Georgia,serif;color:var(--primary);margin:8px 0}
+.summary .verdict{font-size:1.25em;font-weight:600;margin:8px 0}
+.summary.good .verdict{color:var(--good)}.summary.medium .verdict{color:var(--highlight)}.summary.bad .verdict{color:var(--bad)}
+#matchArea{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+@media(max-width:560px){#matchArea{grid-template-columns:1fr}.hero h1{font-size:1.8em}}
+footer{background:var(--bgDark);color:var(--accent);text-align:center;padding:24px;margin-top:46px}
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>Kuis Interaktif PIO</h1>
+  <p>Psikologi Industri & Organisasi · Persiapan UTS · 13 Bab</p>
+  <p style="font-size:.85em;opacity:.7">63 soal · 36 flashcard · 3 set cocokkan</p>
+</div>
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('mc')">📝 Pilihan Ganda</button>
+  <button class="tab" onclick="switchTab('fc')">🃏 Flashcards</button>
+  <button class="tab" onclick="switchTab('match')">🔀 Cocokkan</button>
+</div>
+<div class="container">
+  <div id="mc" class="panel active">
+    <div class="controls">
+      <label>Filter: <select id="chapterFilter" onchange="renderQuestions()"><option value="all">Semua</option></select></label>
+      <label>Tipe: <select id="typeFilter" onchange="renderQuestions()">
+        <option value="all">Semua</option><option value="recall">Recall</option><option value="aplikasi">Aplikasi</option><option value="analisis">Analisis</option>
+      </select></label>
+      <button onclick="resetMC()">🔄 Reset</button>
+      <button onclick="shuffleMC()">🎲 Acak</button>
+      <span class="stats" id="mcStats">0 / 0</span>
+    </div>
+    <div id="questionList"></div>
+    <div id="mcSummary" class="summary"></div>
+  </div>
+  <div id="fc" class="panel">
+    <div class="controls">
+      <label>Filter: <select id="fcChapterFilter" onchange="resetFlashcards()"><option value="all">Semua</option></select></label>
+      <button onclick="shuffleFlashcards()">🎲 Acak</button>
+      <button onclick="resetFlashcards()">🔄 Reset</button>
+    </div>
+    <div class="flashcard-wrapper">
+      <div class="flashcard" id="flashcard" onclick="flipCard()">
+        <div class="flashcard-inner">
+          <div class="flashcard-front"><div class="fc-meta" id="fcMeta">—</div><div class="term" id="fcTerm">Klik untuk mulai</div><div class="hint">(ketuk untuk balik)</div></div>
+          <div class="flashcard-back"><div id="fcDef">—</div></div>
+        </div>
+      </div>
+      <div class="fc-controls"><button class="alt" onclick="prevCard()">← Sebelumnya</button><span class="progress" id="fcProgress">0 / 0</span><button onclick="nextCard()">Selanjutnya →</button></div>
+      <div class="fc-controls" style="margin-top:6px"><button class="bad" onclick="markCard(false)">❌ Belum Tahu</button><button class="acc" onclick="markCard(true)">✓ Sudah Tahu</button></div>
+      <div class="fc-stats"><span>Sudah tahu: <span class="know" id="fcKnow">0</span></span><span>Belum tahu: <span class="dontknow" id="fcDontKnow">0</span></span></div>
+    </div>
+  </div>
+  <div id="match" class="panel">
+    <div class="controls" id="matchControls"></div>
+    <div id="matchArea"><div id="matchLeft"></div><div id="matchRight"></div></div>
+    <div style="text-align:center;margin-top:14px">
+      <button class="qbtn" onclick="checkMatch()">Cek Jawaban</button>
+      <button class="qbtn" style="background:var(--secondary)" onclick="resetMatch()">Reset</button>
+    </div>
+  </div>
+</div>
+<footer>
+  <p style="margin:0;font-family:Georgia,serif;font-size:1.1em">Belajar yang asik & efektif!</p>
+  <p style="margin:6px 0 0;opacity:.7;font-size:.85em">Kuis Interaktif · Psikologi Industri & Organisasi</p>
+</footer>
+<script>
+const QUESTIONS = [{"chapter": 1, "type": "recall", "q": "Psikologi Industri dan Organisasi paling tepat didefinisikan sebagai cabang psikologi terapan yang berkaitan dengan...", "options": ["Diagnosis & pengobatan gangguan jiwa karyawan", "Perilaku, kognisi, emosi, & motivasi manusia dalam konteks pekerjaan", "Masalah klinis pribadi seperti alkoholisme & PTSD", "Pemasaran produk perusahaan"], "correct": 1, "expl": "Psikologi I/O = sains perilaku, kognisi, emosi & motivasi manusia serta penerapannya di konteks kerja/organisasi. Ia TIDAK menangani masalah klinis pribadi (alkoholisme, PTSD)."}, {"chapter": 1, "type": "recall", "q": "Psikologi Industri (Personalia) — yang fokus pada desain pekerjaan, rekrutmen, seleksi, pelatihan & penilaian kinerja — tumbuh dari perspektif...", "options": ["Gerakan hubungan manusia", "Manajemen efisiensi organisasi", "Psikoanalisis", "Behaviorisme radikal"], "correct": 1, "expl": "Sisi Industri (I) tumbuh dari perspektif manajemen efisiensi. Sisi Organisasi (O) tumbuh dari gerakan hubungan manusia (human relations)."}, {"chapter": 1, "type": "recall", "q": "Cabang Psikologi Organisasi (sikap karyawan, stres kerja, pengawasan) berakar dari...", "options": ["Manajemen efisiensi", "Gerakan hubungan manusia (human relations)", "Strukturalisme Wundt", "Scientific Management"], "correct": 1, "expl": "Psikologi Organisasi berfokus pada perilaku & kesejahteraan karyawan, tumbuh dari human relations movement."}, {"chapter": 1, "type": "aplikasi", "q": "Seorang psikolog diminta merancang sistem seleksi dan mengembangkan tes untuk merekrut karyawan baru. Aktivitas ini termasuk ranah...", "options": ["Psikologi Organisasi", "Psikologi Industri", "Psikologi Klinis", "Konseling karier pribadi"], "correct": 1, "expl": "Seleksi, rekrutmen, & pengembangan tes adalah topik khas Psikologi Industri (personalia)."}, {"chapter": 1, "type": "recall", "q": "Organisasi yang berfokus pada kesehatan & keselamatan kerja dan melibatkan psikolog PIO adalah...", "options": ["SIOP", "SOHP (Society For Occupational Health Psychology)", "APA Divisi 1", "O*NET"], "correct": 1, "expl": "SOHP berfokus pada occupational health & safety. Upaya kesejahteraan juga lewat gerakan Psikologi Kerja Kemanusiaan."}, {"chapter": 2, "type": "recall", "q": "Siapa yang dikenal sebagai 'Bapak pendiri' psikologi I/O dan menulis buku teks I/O pertama (1913)?", "options": ["Walter Dill Scott", "Hugo Münsterberg", "Frederick W. Taylor", "Robert Yerkes"], "correct": 1, "expl": "Hugo Münsterberg menulis 'Psychology and Industrial Efficiency' (1913) & berfokus pada seleksi karyawan dengan tes psikologi."}, {"chapter": 2, "type": "recall", "q": "Sistem Manajemen Ilmiah (Scientific Management, 1911) dipelopori oleh...", "options": ["Hugo Münsterberg", "Walter Dill Scott", "Frederick W. Taylor", "Elton Mayo"], "correct": 2, "expl": "Frederick W. Taylor, seorang insinyur, mempelopori Scientific Management untuk meningkatkan produktivitas & efisiensi pekerja pabrik."}, {"chapter": 2, "type": "recall", "q": "Tokoh yang mempelopori psikologi periklanan lewat buku 'The Theory of Advertising' (1903) adalah...", "options": ["Walter Dill Scott", "Münsterberg", "Robert Yerkes", "Frank Gilbreth"], "correct": 0, "expl": "Walter Dill Scott tertarik pada seleksi karyawan & mempelopori psikologi periklanan (1903)."}, {"chapter": 2, "type": "recall", "q": "Tes kelompok Army Alpha dan Army Beta dikembangkan untuk keperluan militer di bawah kepemimpinan...", "options": ["Taylor", "Robert Yerkes", "Scott", "Münsterberg"], "correct": 1, "expl": "Robert Yerkes memimpin komite pengembangan tes kemampuan mental kelompok (Army Alpha & Beta)."}, {"chapter": 2, "type": "recall", "q": "Tes Army Alpha & Beta dikembangkan pada masa...", "options": ["Perang Dunia II", "Perang Dunia I", "Studi Hawthorne", "Revolusi Industri"], "correct": 1, "expl": "Army Alpha & Beta lahir pada Perang Dunia I di AS — aplikasi tes psikologi skala besar pertama, cikal bakal SAT."}, {"chapter": 2, "type": "analisis", "q": "Studi Hawthorne (Roethlisberger & Dickson, 1939) menemukan bahwa produktivitas pekerja meningkat terutama karena...", "options": ["Tingkat pencahayaan yang lebih terang", "Insentif finansial yang besar", "Aspek sosial & perhatian yang diterima pekerja", "Jam kerja yang dipersingkat"], "correct": 2, "expl": "Produktivitas naik bukan karena cahaya, tetapi karena faktor sosial & perhatian — temuan ini resmi meluncurkan sisi Psikologi Organisasi (O)."}, {"chapter": 2, "type": "aplikasi", "q": "Karyawan bekerja lebih giat hanya karena tahu dirinya sedang diamati dalam sebuah eksperimen. Fenomena ini disebut...", "options": ["Halo effect", "Hawthorne effect", "Galatea effect", "Placebo effect"], "correct": 1, "expl": "Hawthorne effect = peningkatan kinerja akibat kesadaran sedang diawasi/menjadi bagian eksperimen."}, {"chapter": 2, "type": "recall", "q": "Studi waktu & gerak (time and motion studies) untuk merancang peralatan terbaik dipelopori oleh...", "options": ["Frank & Lillian Gilbreth", "Taylor & Scott", "Münsterberg & Yerkes", "Mayo & Dickson"], "correct": 0, "expl": "Frank & Lillian Gilbreth memakai observasi dalam time & motion studies untuk mengukur cara & durasi penyelesaian tugas fisik."}, {"chapter": 3, "type": "aplikasi", "q": "Dalam Studi Hawthorne, tingkat kecerahan cahaya yang sengaja dimanipulasi berperan sebagai variabel...", "options": ["Dependen", "Independen", "Kontrol", "Moderator"], "correct": 1, "expl": "Kondisi fisik yang dimanipulasi (cahaya) = variabel independen; produktivitas yang diukur = variabel dependen."}, {"chapter": 3, "type": "recall", "q": "Studi waktu & gerak Gilbreth yang mengamati cara pekerja menyelesaikan tugas merupakan contoh metode penelitian...", "options": ["Survei pendapat", "Observasi", "Eksperimen laboratorium murni", "Studi korelasional"], "correct": 1, "expl": "Time & motion study adalah penerapan nyata metode observasi terhadap perilaku kerja."}, {"chapter": 3, "type": "analisis", "q": "Mengapa penelitian dipandang krusial dalam PIO?", "options": ["Agar praktisi cukup bergantung pada insting & anekdot", "Menghasilkan prinsip ilmiah objektif untuk memahami fenomena organisasi", "Menggantikan kebutuhan akan kode etik", "Mempercepat proses pemecatan karyawan"], "correct": 1, "expl": "Penelitian = fondasi memahami fenomena (pencurian, turnover) & menghasilkan prinsip ilmiah objektif, bukan insting/anekdot."}, {"chapter": 4, "type": "recall", "q": "Prinsip etika yang memastikan individu berhak memutuskan keterlibatannya dalam penelitian tanpa paksaan disebut...", "options": ["Kerahasiaan", "Informed consent", "Integritas", "Kompetensi"], "correct": 1, "expl": "Informed consent menjamin otonomi penuh individu untuk memutuskan terlibat atau tidak, tanpa paksaan."}, {"chapter": 4, "type": "recall", "q": "Prinsip etika yang menuntut psikolog I/O memiliki KSAO (pengetahuan, keterampilan, kemampuan) memadai sebelum melakukan intervensi adalah...", "options": ["Integritas", "Kompetensi", "Tanggung jawab sosial", "Confidentiality"], "correct": 1, "expl": "Kompetensi = memastikan psikolog punya dasar KSAO memadai sebelum melakukan pekerjaan/intervensi profesional."}, {"chapter": 4, "type": "recall", "q": "Bersikap adil, jujur, dan transparan dalam setiap transaksi, penelitian, & praktik profesional adalah prinsip...", "options": ["Integritas", "Kompetensi", "Kerahasiaan", "Otonomi"], "correct": 0, "expl": "Integritas mewajibkan psikolog I/O bersikap adil, jujur, & transparan."}, {"chapter": 4, "type": "aplikasi", "q": "Seorang psikolog menjaga agar data hasil tes kepribadian karyawan tidak bocor ke pihak yang tak berkepentingan. Prinsip etika yang diterapkan adalah...", "options": ["Integritas", "Kerahasiaan (confidentiality)", "Kompetensi", "Tanggung jawab sosial"], "correct": 1, "expl": "Confidentiality = menghormati hak, privasi, & menjaga kerahasiaan individu yang terlibat."}, {"chapter": 5, "type": "recall", "q": "Pendekatan analisis pekerjaan yang berfokus pada tugas & memberi informasi tentang sifat tugas yang dilakukan disebut...", "options": ["Person-oriented", "Job-oriented", "KSAO-oriented", "Trait-oriented"], "correct": 1, "expl": "Job-oriented job analysis berfokus pada tugas & sifat tugas. Person-oriented berfokus pada karakteristik pekerja."}, {"chapter": 5, "type": "recall", "q": "Pendekatan yang berfokus pada karakteristik & atribut pekerja (KSAO) yang dibutuhkan agar sukses disebut...", "options": ["Job-oriented", "Task-oriented", "Person-oriented", "Result-oriented"], "correct": 2, "expl": "Person-oriented job analysis berfokus pada karakteristik pekerja; KSAO-oriented adalah bagian khusus darinya."}, {"chapter": 5, "type": "recall", "q": "KSAO merupakan singkatan dari...", "options": ["Knowledge, Skill, Ability, Other characteristics", "Knowledge, Strength, Aptitude, Output", "Skill, Knowledge, Attitude, Opinion", "Knowledge, Skill, Attitude, Objective"], "correct": 0, "expl": "KSAO = Knowledge, Skill, Ability, Other characteristics."}, {"chapter": 5, "type": "analisis", "q": "'Menegakkan hukum' adalah komponen utama pekerjaan polisi, sedangkan 'menangkap tersangka' adalah bagian spesifiknya. Keduanya berturut-turut disebut...", "options": ["Task & Duty", "Duty & Task", "Ability & Skill", "Knowledge & Skill"], "correct": 1, "expl": "Duty = tugas utama (menegakkan hukum); Task = bagian lengkap spesifik yang mencapai tujuan tertentu (menangkap tersangka)."}, {"chapter": 5, "type": "recall", "q": "Apa yang dapat Anda lakukan secara nyata di tempat kerja (cth: menggunakan perkakas listrik) termasuk komponen...", "options": ["Knowledge", "Skill", "Ability", "Other characteristic"], "correct": 1, "expl": "Skill = apa yang dapat dilakukan secara nyata. Knowledge = apa yang perlu diketahui. Ability = kemampuan dasar fisik/mental."}, {"chapter": 5, "type": "recall", "q": "Koordinasi mata-tangan adalah contoh dari komponen...", "options": ["Knowledge", "Skill", "Ability", "Other characteristic"], "correct": 2, "expl": "Ability = kemampuan fisik/mental dasar (cth: koordinasi mata-tangan) untuk melakukan/belajar tugas."}, {"chapter": 5, "type": "aplikasi", "q": "Untuk menyusun daftar KSAO yang dibutuhkan agar pelamar dapat dipilih & disaring, analisis pekerjaan dimanfaatkan untuk...", "options": ["Pelatihan", "Seleksi", "Penilaian kinerja", "Job evaluation"], "correct": 1, "expl": "Seleksi memanfaatkan job analysis untuk mengidentifikasi daftar KSAO sukses sebagai dasar penyaringan pelamar."}, {"chapter": 6, "type": "recall", "q": "Wawancara di mana pewawancara menanyakan apa saja yang terlintas, dengan korelasi rendah terhadap kinerja (r=0,17), disebut...", "options": ["Structured interview", "Unstructured interview", "Situational interview", "Panel interview"], "correct": 1, "expl": "Unstructured interview rentan bias & berkorelasi rendah (r=0,17). Semakin terstruktur, validitas makin tinggi (r=0,34)."}, {"chapter": 6, "type": "recall", "q": "Wawancara dengan serangkaian pertanyaan tetap yang sama untuk setiap pelamar (validitas lebih tinggi, r=0,34) disebut...", "options": ["Unstructured interview", "Structured interview", "Stress interview", "Casual interview"], "correct": 1, "expl": "Structured interview = pertanyaan tetap & seragam → validitas lebih tinggi (r=0,34)."}, {"chapter": 6, "type": "aplikasi", "q": "Calon sopir diminta benar-benar mengemudikan kendaraan sebagai bagian seleksi. Metode ini disebut...", "options": ["Assessment center", "Work sample", "Biographical inventory", "Situational interview"], "correct": 1, "expl": "Work sample = pelamar melakukan tugas nyata pekerjaan di kondisi standar (cth: tes menyetir). Prediktor kinerja yang baik."}, {"chapter": 6, "type": "recall", "q": "Serangkaian latihan simulasi (in-basket, LGD, role play) yang dievaluasi panel & biasa dipakai untuk posisi manajerial disebut...", "options": ["Work sample", "Assessment center", "Tes kognitif", "Biographical inventory"], "correct": 1, "expl": "Assessment center = serangkaian latihan simulasi untuk mengukur performa, lazim untuk posisi manajerial/white collar."}, {"chapter": 6, "type": "aplikasi", "q": "Pelamar berpura-pura di hari pertama kerja & harus menangani tumpukan surat, memo, serta pesan telepon. Latihan assessment center ini disebut...", "options": ["Leaderless Group Discussion", "In-basket exercise", "Role play", "Work sample"], "correct": 1, "expl": "In-basket exercise = pelamar memutuskan cara menangani tumpukan item (surat, memo, pesan) di keranjang tugas."}, {"chapter": 6, "type": "recall", "q": "Latihan di mana beberapa peserta menyelesaikan suatu masalah bersama tanpa pemimpin yang ditunjuk disebut...", "options": ["In-basket", "Leaderless Group Discussion (LGD)", "Role play", "Structured interview"], "correct": 1, "expl": "LGD = peserta memecahkan masalah bersama tanpa pemimpin ditunjuk; bisa kompetitif atau kooperatif."}, {"chapter": 6, "type": "recall", "q": "Model RIASEC (Realistis, Investigatif, Artistik, Sosial, Enterprising, Konvensional) digunakan dalam...", "options": ["Tes kepribadian", "Tes minat kejuruan", "Tes kemampuan kognitif", "Tes integritas"], "correct": 1, "expl": "RIASEC adalah kerangka umum tes minat kejuruan yang membagi minat ke 6 tipe."}, {"chapter": 6, "type": "analisis", "q": "Kelemahan utama tes kepribadian dalam seleksi adalah...", "options": ["Selalu mahal & lambat", "Pelamar berpotensi memalsukan jawaban (faking)", "Membutuhkan komputer khusus", "Tidak pernah terstandar"], "correct": 1, "expl": "Tes kepribadian rentan faking & kadang dinilai kurang relevan jika tak dispesifikasikan ke sifat pendukung performa jabatan."}, {"chapter": 6, "type": "recall", "q": "Tes yang efisien, valid, & berbiaya rendah untuk memprediksi kinerja pekerjaan adalah...", "options": ["Tes psikomotorik", "Tes kemampuan kognitif", "Tes minat", "Tes kecerdasan emosional"], "correct": 1, "expl": "Tes kemampuan kognitif (kertas-pensil kelompok) dikenal efisien, valid, & murah untuk memprediksi kinerja."}, {"chapter": 8, "type": "recall", "q": "Tahap pelatihan yang menentukan karyawan mana yang butuh pelatihan & apa kontennya disebut...", "options": ["Training design", "Training Needs Assessment", "Evaluate training", "Deliver training"], "correct": 1, "expl": "Training Needs Assessment menentukan siapa yang butuh pelatihan & apa isinya."}, {"chapter": 8, "type": "recall", "q": "Harapan agar karyawan menerapkan hasil belajar pelatihan ke pekerjaan sehari-hari disebut...", "options": ["Automaticity", "Transfer of training", "Overlearning", "Modeling"], "correct": 1, "expl": "Transfer of training = penerapan hasil pelatihan ke pekerjaan nyata sehari-hari."}, {"chapter": 8, "type": "analisis", "q": "Tingkat kemahiran di mana sebuah tugas dapat dilakukan secara otomatis, sering dicapai melalui overlearning, disebut...", "options": ["Transfer of training", "Automaticity", "Modeling", "Simulation"], "correct": 1, "expl": "Automaticity = kemahiran sampai tugas berjalan otomatis, dicapai lewat overlearning (latihan berulang)."}, {"chapter": 8, "type": "aplikasi", "q": "Peserta pelatihan mengamati & meniru instruktur yang sedang melakukan suatu tugas. Metode pelatihan ini disebut...", "options": ["Simulation", "Modeling", "Conference", "Autoinstruction"], "correct": 1, "expl": "Modeling = peserta mengamati & meniru seseorang yang melakukan tugas."}, {"chapter": 8, "type": "recall", "q": "Tingkatan need assessment yang menyelaraskan pelatihan dengan tujuan & kinerja organisasi secara keseluruhan adalah...", "options": ["Job analysis", "Person analysis", "Organizational analysis", "Task analysis"], "correct": 2, "expl": "Organizational analysis menyelaraskan pelatihan dengan tujuan organisasi; Person analysis menilai gap kemampuan individu."}, {"chapter": 9, "type": "recall", "q": "Dalam model 4 level, evaluasi yang mengukur seberapa suka peserta terhadap pelatihan (biasanya via kuesioner) adalah level...", "options": ["Learning", "Reaction", "Behavior", "Results"], "correct": 1, "expl": "Reaction = seberapa suka & bermanfaatnya pelatihan menurut peserta (kuesioner)."}, {"chapter": 9, "type": "recall", "q": "Level evaluasi yang mengukur pengetahuan/keterampilan yang diserap peserta (biasanya via ujian) adalah...", "options": ["Reaction", "Learning", "Behavior", "Results"], "correct": 1, "expl": "Learning = pengetahuan/keterampilan yang diserap, diukur lewat ujian/tes."}, {"chapter": 9, "type": "aplikasi", "q": "Setelah pelatihan, perubahan tindakan karyawan saat kembali bekerja diukur melalui penilaian kinerja. Ini termasuk level evaluasi...", "options": ["Reaction", "Learning", "Behavior", "Results"], "correct": 2, "expl": "Behavior = perubahan tindakan saat kembali bekerja (via penilaian kinerja). Results = dampak ke organisasi."}, {"chapter": 10, "type": "recall", "q": "Skala penilaian kinerja di mana setiap pilihan jawaban didefinisikan secara perilaku dalam kontinum efektivitas disebut...", "options": ["Graphic Rating Scale", "BARS (Behaviorally Anchored Rating Scale)", "BOS", "Critical Incident"], "correct": 1, "expl": "BARS mengaitkan setiap skor dengan contoh perilaku konkret dalam kontinum efektivitas."}, {"chapter": 10, "type": "recall", "q": "Metode di mana penilai mencatat seberapa sering (persentase waktu) karyawan melakukan perilaku tertentu disebut...", "options": ["BARS", "BOS (Behavior Observation Scale)", "Graphic Rating Scale", "Critical Incident"], "correct": 1, "expl": "BOS = penilai mencatat frekuensi (% waktu) perilaku yang ditentukan, berbasis insiden kritis."}, {"chapter": 10, "type": "recall", "q": "Jumlah absensi, angka kecelakaan, & volume penjualan merupakan contoh pengukuran kinerja...", "options": ["Subjektif", "Objektif", "Teoritis", "Komposit"], "correct": 1, "expl": "Objective measures = data kuantitatif tercatat (absensi, kecelakaan, penjualan). Subjective = opini/rating orang lain."}, {"chapter": 10, "type": "analisis", "q": "Ketika kriteria aktual TIDAK mencakup seluruh aspek kriteria teoritis, terjadi...", "options": ["Criterion contamination", "Criterion deficiency", "Criterion relevance", "Criterion complexity"], "correct": 1, "expl": "Criterion deficiency = ketidaklengkapan; kriteria aktual tak menutup seluruh kriteria teoritis."}, {"chapter": 10, "type": "analisis", "q": "Ketika kriteria aktual mencakup hal yang tidak relevan (cth: bias atau faktor di luar kendali), terjadi...", "options": ["Criterion deficiency", "Criterion contamination", "Criterion relevance", "Criterion complexity"], "correct": 1, "expl": "Criterion contamination = kriteria aktual terkontaminasi hal tak relevan dengan kinerja sesungguhnya."}, {"chapter": 11, "type": "recall", "q": "Proses sistematis untuk menentukan nilai relatif suatu pekerjaan agar dapat menetapkan tingkat gaji yang adil disebut...", "options": ["Job analysis", "Job evaluation", "Performance appraisal", "Job design"], "correct": 1, "expl": "Job evaluation = menentukan nilai/bobot relatif pekerjaan sebagai dasar penetapan gaji yang adil."}, {"chapter": 11, "type": "recall", "q": "Memastikan pekerjaan dengan beban, tanggung jawab, & keahlian serupa mendapat kompensasi setara disebut menciptakan...", "options": ["External equity", "Internal equity (keadilan internal)", "Comparable worth", "Merit pay"], "correct": 1, "expl": "Internal equity = keadilan internal; pekerjaan dengan bobot serupa dibayar setara, menghapus ketimpangan tak berdasar."}, {"chapter": 12, "type": "recall", "q": "Tiga komponen motivasi yang disebut dalam materi adalah direction, intensity, dan...", "options": ["Arousal", "Persistence", "Valence", "Equity"], "correct": 1, "expl": "Direction (pilihan perilaku), Intensity (besarnya usaha), Persistence (keterlibatan berkelanjutan)."}, {"chapter": 12, "type": "analisis", "q": "Menurut hierarki kebutuhan Maslow, seseorang dimotivasi oleh kebutuhan di tingkat...", "options": ["Tertinggi yang belum terpenuhi", "Terendah yang belum terpenuhi", "Mana saja secara acak", "Sosial saja"], "correct": 1, "expl": "Maslow: orang dimotivasi oleh kebutuhan TERENDAH yang belum terpenuhi pada momen tersebut."}, {"chapter": 12, "type": "recall", "q": "Dalam teori dua faktor Herzberg, gaji, kualitas pengawasan, rekan kerja, & kebijakan organisasi termasuk...", "options": ["Motivator factors", "Hygiene factors", "Valence", "Equity"], "correct": 1, "expl": "Hygiene factors = aspek terkait kebutuhan dasar (gaji, pengawasan, rekan kerja, kebijakan). Motivator = pencapaian, pengakuan, tanggung jawab."}, {"chapter": 12, "type": "recall", "q": "Pencapaian (achievement), pengakuan, tanggung jawab, & sifat pekerjaan itu sendiri menurut Herzberg termasuk...", "options": ["Hygiene factors", "Motivator factors", "Hierarki kebutuhan", "Instrumentality"], "correct": 1, "expl": "Motivator factors = faktor intrinsik (pencapaian, pengakuan, tanggung jawab, sifat pekerjaan) yang mendorong kepuasan kerja."}, {"chapter": 12, "type": "recall", "q": "Dalam Expectancy Theory (Vroom), nilai atau bobot suatu hasil/penghargaan di mata individu disebut...", "options": ["Expectancy", "Instrumentality", "Valence", "Force"], "correct": 2, "expl": "Valence = nilai/bobot hasil bagi individu. Force = Expectancy × Σ(Valence × Instrumentality)."}, {"chapter": 12, "type": "recall", "q": "Probabilitas subjektif (0–1) tentang kemampuan diri menyelesaikan tugas, terkait kepercayaan diri, disebut...", "options": ["Expectancy", "Instrumentality", "Valence", "Equity"], "correct": 0, "expl": "Expectancy = probabilitas subjektif mengenai kemampuan diri (0 hingga 1)."}, {"chapter": 12, "type": "analisis", "q": "Menurut Goal-Setting Theory, kinerja paling unggul terbentuk jika tujuan bersifat...", "options": ["Mudah & umum", "Sulit & spesifik (bukan 'lakukan yang terbaik')", "Samar & ditugaskan organisasi", "Mudah & ditetapkan organisasi"], "correct": 1, "expl": "Tujuan yang sulit & spesifik (specific hard goals) — terutama jika ditetapkan sendiri — menghasilkan kinerja terbaik."}, {"chapter": 12, "type": "aplikasi", "q": "Keyakinan positif seseorang terhadap kemampuan dirinya yang menuntun pada kinerja lebih baik dikenal sebagai...", "options": ["Pygmalion effect", "Galatea effect", "Hawthorne effect", "Halo effect"], "correct": 1, "expl": "Galatea effect = self-fulfilling prophecy dari keyakinan diri (self-efficacy) yang meningkatkan kinerja."}, {"chapter": 12, "type": "aplikasi", "q": "Karyawan merasa rekannya mendapat imbalan lebih tinggi padahal usahanya serupa, lalu merasa marah. Menurut Equity Theory ini disebut...", "options": ["Overpayment inequity", "Underpayment inequity", "Distributive justice", "Valence"], "correct": 1, "expl": "Underpayment inequity = merasa orang lain diberi imbalan lebih untuk usaha serupa → memicu kemarahan. Overpayment → rasa bersalah."}, {"chapter": 13, "type": "recall", "q": "Kemampuan mengenali suasana hati & dorongan diri sendiri serta dampaknya terhadap lingkungan kerja adalah komponen EI...", "options": ["Self-regulation", "Self-awareness", "Empathy", "Social skills"], "correct": 1, "expl": "Self-awareness (kesadaran diri) = mengenali suasana hati & dorongan diri serta dampaknya."}, {"chapter": 13, "type": "recall", "q": "Kemampuan menempatkan diri pada posisi orang lain & memperlakukan mereka sesuai reaksi emosional mereka disebut...", "options": ["Self-awareness", "Self-regulation", "Empathy", "Internal motivation"], "correct": 2, "expl": "Empathy (empati) = menempatkan diri pada posisi orang lain & merespons emosi mereka dengan tepat."}, {"chapter": 13, "type": "analisis", "q": "Komponen-komponen kecerdasan emosional terbukti sering berkorelasi kuat dengan sifat Big Five...", "options": ["Openness & Extraversion", "Emotional Stability & Agreeableness", "Conscientiousness & Openness", "Extraversion & Conscientiousness"], "correct": 1, "expl": "EI berkorelasi kuat dengan Emotional Stability (tidak mudah cemas) & Agreeableness (kooperatif & ramah)."}];
+const FLASHCARDS = [{"chapter": 1, "term": "Psikologi I/O", "def": "Cabang psikologi terapan tentang perilaku, kognisi, emosi & motivasi manusia serta penerapannya di konteks kerja/organisasi."}, {"chapter": 1, "term": "Psikologi Industri vs Organisasi", "def": "Industri (I): efisiensi & personalia (seleksi, pelatihan, penilaian). Organisasi (O): kesejahteraan & perilaku (sikap, stres, pengawasan)."}, {"chapter": 1, "term": "SOHP", "def": "Society For Occupational Health Psychology — wadah psikolog PIO untuk kesehatan & keselamatan kerja."}, {"chapter": 2, "term": "Hugo Münsterberg", "def": "Bapak pendiri psikologi I/O; menulis buku teks I/O pertama 'Psychology and Industrial Efficiency' (1913)."}, {"chapter": 2, "term": "Frederick W. Taylor", "def": "Insinyur pelopor Scientific Management (1911) untuk meningkatkan produktivitas & efisiensi pekerja pabrik."}, {"chapter": 2, "term": "Walter Dill Scott", "def": "Pionir seleksi karyawan & psikologi periklanan ('The Theory of Advertising', 1903)."}, {"chapter": 2, "term": "Army Alpha & Beta", "def": "Tes kemampuan mental kelompok (PD I, dipimpin Yerkes); aplikasi tes psikologi massal pertama, cikal bakal SAT."}, {"chapter": 2, "term": "Studi Hawthorne", "def": "Roethlisberger & Dickson (1939): produktivitas naik karena perhatian & faktor sosial, bukan cahaya. Meluncurkan sisi Psikologi Organisasi."}, {"chapter": 2, "term": "Hawthorne Effect", "def": "Peningkatan kinerja akibat kesadaran sedang diawasi/menjadi bagian dari eksperimen."}, {"chapter": 3, "term": "Variabel (konteks Hawthorne)", "def": "Independen = cahaya yang dimanipulasi; Dependen = produktivitas yang diukur."}, {"chapter": 4, "term": "Informed Consent", "def": "Individu berhak memutuskan keterlibatan dalam penelitian/tindakan tanpa paksaan (otonomi penuh)."}, {"chapter": 4, "term": "Kompetensi", "def": "Prinsip etika: psikolog wajib punya KSAO memadai sebelum melakukan intervensi profesional."}, {"chapter": 4, "term": "Integritas", "def": "Prinsip etika: bersikap adil, jujur, & transparan dalam transaksi, penelitian, & praktik."}, {"chapter": 5, "term": "KSAO", "def": "Knowledge, Skill, Ability, Other characteristics — atribut pekerja untuk sukses dalam pekerjaan."}, {"chapter": 5, "term": "Duty vs Task", "def": "Duty = tugas utama (menegakkan hukum). Task = bagian spesifik yang mencapai tujuan (menangkap tersangka)."}, {"chapter": 5, "term": "Job-oriented vs Person-oriented", "def": "Job-oriented fokus pada tugas/sifat tugas; Person-oriented fokus pada karakteristik pekerja (KSAO)."}, {"chapter": 6, "term": "Structured Interview", "def": "Pertanyaan tetap & seragam untuk semua pelamar → validitas lebih tinggi (r=0,34) dibanding unstructured (r=0,17)."}, {"chapter": 6, "term": "Work Sample", "def": "Pelamar melakukan tugas nyata pekerjaan di kondisi standar (cth: tes menyetir); prediktor kinerja yang baik."}, {"chapter": 6, "term": "Assessment Center", "def": "Serangkaian latihan simulasi (in-basket, LGD, role play) dinilai panel; lazim untuk posisi manajerial."}, {"chapter": 6, "term": "In-Basket Exercise", "def": "Pelamar menangani tumpukan surat/memo/pesan seolah hari pertama kerja."}, {"chapter": 6, "term": "RIASEC", "def": "Model tes minat kejuruan: Realistis, Investigatif, Artistik, Sosial, Enterprising, Konvensional."}, {"chapter": 8, "term": "Transfer of Training", "def": "Harapan bahwa karyawan menerapkan hasil belajar pelatihan ke pekerjaan sehari-hari."}, {"chapter": 8, "term": "Automaticity", "def": "Kemahiran sampai tugas dilakukan otomatis, dicapai lewat overlearning (latihan berulang)."}, {"chapter": 8, "term": "Level Need Assessment", "def": "Organizational (selaras tujuan organisasi), Job (KSAO pekerjaan), Person (gap kemampuan individu)."}, {"chapter": 9, "term": "4 Level Evaluasi Pelatihan", "def": "Reaction (suka?), Learning (pengetahuan?), Behavior (perubahan tindakan?), Results (dampak organisasi?)."}, {"chapter": 10, "term": "BARS", "def": "Behaviorally Anchored Rating Scale — setiap skor dikaitkan dengan contoh perilaku konkret."}, {"chapter": 10, "term": "BOS", "def": "Behavior Observation Scale — penilai mencatat seberapa sering (% waktu) perilaku tertentu muncul."}, {"chapter": 10, "term": "Criterion Deficiency vs Contamination", "def": "Deficiency = kriteria aktual tak lengkap. Contamination = kriteria aktual memuat hal tak relevan/bias."}, {"chapter": 11, "term": "Job Evaluation", "def": "Proses sistematis menentukan nilai relatif pekerjaan untuk menetapkan gaji yang adil (internal equity)."}, {"chapter": 12, "term": "Komponen Motivasi", "def": "Direction (pilihan perilaku), Intensity (besarnya usaha), Persistence (keterlibatan berkelanjutan)."}, {"chapter": 12, "term": "Hygiene vs Motivator (Herzberg)", "def": "Hygiene = gaji, pengawasan, kebijakan (cegah ketidakpuasan). Motivator = pencapaian, pengakuan, tanggung jawab (dorong kepuasan)."}, {"chapter": 12, "term": "Expectancy Theory (Vroom)", "def": "Force = Expectancy × Σ(Valence × Instrumentality). Jika satu komponen nol, motivasi jadi nol."}, {"chapter": 12, "term": "Goal-Setting (Locke)", "def": "Tujuan sulit & spesifik (specific hard goals), ditetapkan sendiri + feedback → kinerja terbaik."}, {"chapter": 12, "term": "Galatea Effect", "def": "Keyakinan diri (self-efficacy) tinggi menjadi self-fulfilling prophecy yang meningkatkan kinerja."}, {"chapter": 12, "term": "Equity Theory", "def": "Orang membandingkan rasio outcome/input dengan orang lain. Underpayment → marah; Overpayment → bersalah."}, {"chapter": 13, "term": "5 Komponen EI (Goleman)", "def": "Self-awareness, Self-regulation, Internal motivation, Empathy, Social skills."}];
+const MATCH_SETS = [{"title": "Sejarah & Tokoh", "pairs": [["Hugo Münsterberg", "Bapak pendiri psikologi I/O (buku 1913)"], ["Frederick W. Taylor", "Scientific Management (1911)"], ["Walter Dill Scott", "Psikologi periklanan (1903)"], ["Robert Yerkes", "Army Alpha & Beta"], ["Frank & Lillian Gilbreth", "Time and motion studies"], ["Studi Hawthorne", "Meluncurkan Psikologi Organisasi"], ["Hawthorne Effect", "Kinerja naik karena merasa diawasi"], ["APA Divisi 14", "Cikal bakal SIOP (pasca PD II)"]]}, {"title": "Seleksi & Job Analysis", "pairs": [["KSAO", "Knowledge, Skill, Ability, Other"], ["Duty", "Tugas utama (cth: menegakkan hukum)"], ["Task", "Bagian spesifik (cth: menangkap tersangka)"], ["Structured interview", "Validitas tinggi (r=0,34)"], ["Work sample", "Tes tugas nyata (cth: menyetir)"], ["In-basket exercise", "Menangani surat/memo/pesan"], ["LGD", "Diskusi kelompok tanpa pemimpin"], ["RIASEC", "Model tes minat kejuruan"]]}, {"title": "Motivasi & Kinerja", "pairs": [["Maslow", "Hierarki kebutuhan (terendah dulu)"], ["Herzberg", "Dua faktor: hygiene & motivator"], ["Vroom", "Expectancy Theory (Force)"], ["Locke", "Goal-Setting (specific hard goals)"], ["Adams", "Equity Theory (rasio outcome/input)"], ["Galatea effect", "Self-efficacy → kinerja naik"], ["BARS", "Skala berlabel perilaku konkret"], ["Criterion deficiency", "Kriteria aktual tak lengkap"]]}];
+const CHAPTER_NAMES = null;
+function chapLabel(c){ if(CHAPTER_NAMES&&CHAPTER_NAMES[c]!==undefined)return CHAPTER_NAMES[c]; if(CHAPTER_NAMES&&CHAPTER_NAMES[String(c)]!==undefined)return CHAPTER_NAMES[String(c)]; return 'Bab '+c; }
+let activeQuestions=[], answered={}, fcDeck=[], fcIdx=0, fcKnown=new Set(), fcUnknown=new Set();
+let matchState={left:[],right:[],matched:{},set:0,selectedLeft:null,selectedRight:null};
+
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector('.tab[onclick*="'+name+'"]').classList.add('active');
+  document.getElementById(name).classList.add('active');
+  if(name==='fc' && fcDeck.length===0) resetFlashcards();
+  if(name==='match' && matchState.left.length===0) loadMatch(0);
+}
+function populateFilters(){
+  const chapters=[...new Set(QUESTIONS.map(q=>q.chapter))].sort((a,b)=>a-b);
+  const fcChapters=[...new Set(FLASHCARDS.map(c=>c.chapter))].sort((a,b)=>a-b);
+  const filter=document.getElementById('chapterFilter'), fcFilter=document.getElementById('fcChapterFilter');
+  chapters.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=chapLabel(c);filter.appendChild(o);});
+  fcChapters.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=chapLabel(c);fcFilter.appendChild(o);});
+}
+function renderQuestions(){
+  const ch=document.getElementById('chapterFilter').value, tp=document.getElementById('typeFilter').value;
+  activeQuestions=QUESTIONS.filter(q=>(ch==='all'||q.chapter==ch)&&(tp==='all'||q.type===tp));
+  const container=document.getElementById('questionList');container.innerHTML='';
+  activeQuestions.forEach((q,i)=>{
+    const div=document.createElement('div');div.className='question';
+    const qid=q.chapter+'_'+q.q.substring(0,30);
+    div.innerHTML='<div class="meta"><span class="pill">'+chapLabel(q.chapter)+'</span>'+
+      '<span class="pill '+q.type+'">'+q.type.toUpperCase()+'</span>'+
+      '<span style="color:var(--muted);font-size:.82em">Soal #'+(i+1)+'</span></div>'+
+      '<div class="qtext">'+q.q+'</div><div class="options">'+
+      q.options.map((opt,j)=>'<div class="option" onclick="selectOption(this,\''+qid+'\','+j+','+q.correct+')">'+
+        '<span class="letter">'+String.fromCharCode(65+j)+'</span><span>'+opt+'</span></div>').join('')+
+      '</div><div class="explanation"><strong>💡 Penjelasan:</strong> '+q.expl+'</div>';
+    container.appendChild(div);
+  });
+  updateMCStats();document.getElementById('mcSummary').classList.remove('show');
+}
+function selectOption(el,qid,idx,correct){
+  if(answered[qid]!==undefined)return;
+  const allOpts=el.parentElement.querySelectorAll('.option');
+  allOpts.forEach((o,i)=>{o.classList.remove('selected');if(i===correct)o.classList.add('correct');if(i===idx&&idx!==correct)o.classList.add('wrong');});
+  el.classList.add('selected');
+  el.parentElement.parentElement.querySelector('.explanation').classList.add('show');
+  answered[qid]=(idx===correct);updateMCStats();
+}
+function updateMCStats(){
+  const total=activeQuestions.length;
+  const keys=Object.keys(answered).filter(k=>activeQuestions.some(q=>(q.chapter+'_'+q.q.substring(0,30))===k));
+  const ans=keys.length, correct=keys.filter(k=>answered[k]).length;
+  document.getElementById('mcStats').textContent=correct+'/'+ans+' benar ('+total+' total)';
+  if(ans===total&&total>0) showSummary(correct,total);
+}
+function showSummary(correct,total){
+  const pct=Math.round(correct/total*100);
+  let cls='bad',v='Perlu belajar lagi — ulang & coba lagi!';
+  if(pct>=80){cls='good';v='Sangat siap! 🎓';}else if(pct>=60){cls='medium';v='Hampir siap — fokus ke yang salah!';}
+  const s=document.getElementById('mcSummary');s.className='summary show '+cls;
+  s.innerHTML='<div style="font-size:.92em;color:var(--muted)">SKOR AKHIR</div><div class="score">'+pct+'%</div>'+
+    '<div class="verdict">'+v+'</div><div style="margin-top:10px">Benar <strong>'+correct+'</strong> dari <strong>'+total+'</strong>.</div>'+
+    '<button class="qbtn" style="margin-top:14px" onclick="resetMC()">Ulangi</button>';
+}
+function resetMC(){answered={};renderQuestions();}
+function shuffleMC(){for(let i=QUESTIONS.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[QUESTIONS[i],QUESTIONS[j]]=[QUESTIONS[j],QUESTIONS[i]];}renderQuestions();}
+function resetFlashcards(){
+  const ch=document.getElementById('fcChapterFilter').value;
+  fcDeck=FLASHCARDS.filter(c=>ch==='all'||c.chapter==ch);
+  fcIdx=0;fcKnown=new Set();fcUnknown=new Set();showCard();updateFCStats();
+}
+function showCard(){
+  if(fcDeck.length===0){document.getElementById('fcTerm').textContent='Tidak ada kartu';document.getElementById('fcDef').textContent='—';document.getElementById('fcMeta').textContent='—';document.getElementById('fcProgress').textContent='0 / 0';return;}
+  const c=fcDeck[fcIdx];
+  document.getElementById('fcTerm').textContent=c.term;document.getElementById('fcDef').textContent=c.def;
+  document.getElementById('fcMeta').textContent=chapLabel(c.chapter);
+  document.getElementById('fcProgress').textContent=(fcIdx+1)+' / '+fcDeck.length;
+  document.getElementById('flashcard').classList.remove('flipped');
+}
+function flipCard(){document.getElementById('flashcard').classList.toggle('flipped');}
+function nextCard(){if(fcDeck.length===0)return;fcIdx=(fcIdx+1)%fcDeck.length;showCard();}
+function prevCard(){if(fcDeck.length===0)return;fcIdx=(fcIdx-1+fcDeck.length)%fcDeck.length;showCard();}
+function markCard(k){if(fcDeck.length===0)return;const t=fcDeck[fcIdx].term;if(k){fcKnown.add(t);fcUnknown.delete(t);}else{fcUnknown.add(t);fcKnown.delete(t);}updateFCStats();nextCard();}
+function updateFCStats(){document.getElementById('fcKnow').textContent=fcKnown.size;document.getElementById('fcDontKnow').textContent=fcUnknown.size;}
+function shuffleFlashcards(){for(let i=fcDeck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[fcDeck[i],fcDeck[j]]=[fcDeck[j],fcDeck[i]];}fcIdx=0;showCard();}
+function buildMatchControls(){
+  const c=document.getElementById('matchControls');c.innerHTML='';
+  MATCH_SETS.forEach((s,i)=>{const b=document.createElement('button');b.textContent='Set '+(i+1)+': '+s.title;b.onclick=()=>loadMatch(i);c.appendChild(b);});
+  const sp=document.createElement('span');sp.className='stats';sp.id='matchStats';sp.textContent='— / —';c.appendChild(sp);
+}
+function loadMatch(idx){
+  matchState.set=idx;matchState.matched={};
+  const set=MATCH_SETS[idx];
+  const left=set.pairs.map((p,i)=>({id:i,text:p[0]}));
+  const right=set.pairs.map((p,i)=>({id:i,text:p[1]}));
+  for(let i=right.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[right[i],right[j]]=[right[j],right[i]];}
+  matchState.left=left;matchState.right=right;matchState.selectedLeft=null;matchState.selectedRight=null;renderMatch();
+}
+function renderMatch(){
+  const lc=document.getElementById('matchLeft'),rc=document.getElementById('matchRight');
+  lc.innerHTML='<h3 style="margin:0 0 10px;color:var(--primary)">Konsep / Tokoh</h3>';
+  rc.innerHTML='<h3 style="margin:0 0 10px;color:var(--primary)">Pasangan</h3>';
+  matchState.left.forEach(item=>{
+    const matched=matchState.matched[item.id]!==undefined, correct=matchState.matched[item.id]===item.id;
+    const d=document.createElement('div');d.className='option';d.style.marginBottom='6px';
+    if(matched&&correct)d.classList.add('correct');if(matched&&!correct)d.classList.add('wrong');
+    if(matchState.selectedLeft===item.id)d.classList.add('selected');
+    d.textContent=item.text;d.onclick=()=>selectLeft(item.id);lc.appendChild(d);
+  });
+  matchState.right.forEach(item=>{
+    const used=Object.values(matchState.matched).includes(item.id);
+    const d=document.createElement('div');d.className='option';d.style.marginBottom='6px';
+    if(used)d.style.opacity='0.4';if(matchState.selectedRight===item.id)d.classList.add('selected');
+    d.textContent=item.text;d.onclick=()=>selectRight(item.id);rc.appendChild(d);
+  });
+  const total=matchState.left.length, matched=Object.keys(matchState.matched).length;
+  const correct=Object.entries(matchState.matched).filter(([k,v])=>k==v).length;
+  const st=document.getElementById('matchStats');if(st)st.textContent=correct+'/'+matched+' benar ('+total+' total)';
+}
+function selectLeft(id){if(matchState.matched[id]!==undefined)return;matchState.selectedLeft=id;if(matchState.selectedRight!==null)tryMatch();renderMatch();}
+function selectRight(id){if(Object.values(matchState.matched).includes(id))return;matchState.selectedRight=id;if(matchState.selectedLeft!==null)tryMatch();renderMatch();}
+function tryMatch(){matchState.matched[matchState.selectedLeft]=matchState.selectedRight;matchState.selectedLeft=null;matchState.selectedRight=null;}
+function checkMatch(){alert('HIJAU = benar, MERAH = salah. Ketuk konsep di kiri lalu pasangannya di kanan!');}
+function resetMatch(){loadMatch(matchState.set);}
+populateFilters();renderQuestions();buildMatchControls();
+</script>
+</body>
+</html>
