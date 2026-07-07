@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f172a">
+<title>Kuis Interaktif — PIO Kelompok</title>
+<style>
+  :root{
+    --bg:#0f172a; --card:#1e293b; --card2:#273549; --line:#334155;
+    --txt:#e2e8f0; --muted:#94a3b8; --accent:#6366f1; --accent2:#818cf8;
+    --ok:#22c55e; --okbg:#14331f; --bad:#ef4444; --badbg:#3a1616; --warn:#f59e0b;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    background:linear-gradient(160deg,#0f172a,#131f3a);color:var(--txt);min-height:100vh;line-height:1.55;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  .wrap{max-width:780px;margin:0 auto;padding:20px 16px 72px}
+  h1{font-size:1.55rem;margin:0 0 2px}
+  .sub{color:var(--muted);margin:0;font-size:.9rem}
+  .counts{color:var(--accent2);font-size:.82rem;margin:4px 0 18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px;
+    box-shadow:0 8px 30px rgba(0,0,0,.25)}
+  .badge{display:inline-block;font-size:.7rem;font-weight:600;padding:3px 10px;border-radius:999px;
+    background:var(--card2);color:var(--accent2);border:1px solid var(--line);margin-bottom:10px}
+  .pill{font-size:.72rem;padding:3px 9px;border-radius:999px;background:var(--card2);border:1px solid var(--line);color:var(--muted)}
+
+  /* mode tabs */
+  .tabs{display:flex;gap:8px;margin-bottom:16px}
+  .tab{flex:1;background:var(--card2);border:1px solid var(--line);color:var(--txt);padding:12px 6px;border-radius:12px;
+    cursor:pointer;font-size:.9rem;font-weight:600;text-align:center;transition:.15s;min-height:48px}
+  .tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  /* filters */
+  .filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px}
+  .flabel{color:var(--muted);font-size:.8rem;margin-right:2px}
+  .chip{background:var(--card2);border:1px solid var(--line);color:var(--txt);padding:7px 12px;border-radius:999px;
+    cursor:pointer;font-size:.82rem;transition:.12s;min-height:36px}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .toolrow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:10px 0 4px;flex-wrap:wrap}
+  .btn{background:var(--accent);color:#fff;border:none;padding:11px 18px;border-radius:12px;font-size:.92rem;
+    font-weight:600;cursor:pointer;transition:.15s;min-height:44px}
+  .btn:hover{background:var(--accent2)}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
+  .btn.sm{padding:9px 14px;font-size:.85rem}
+  .score{font-weight:700;color:var(--accent2);font-size:.95rem}
+
+  /* MC */
+  .qtext{font-size:1.05rem;font-weight:600;margin:4px 0 14px}
+  .opt{display:block;width:100%;text-align:left;background:var(--card2);border:1px solid var(--line);
+    color:var(--txt);padding:13px 15px;border-radius:12px;margin-bottom:9px;cursor:pointer;font-size:.96rem;
+    transition:.12s;min-height:48px}
+  .opt:hover:not(:disabled){border-color:var(--accent)}
+  .opt.correct{background:var(--okbg);border-color:var(--ok)}
+  .opt.wrong{background:var(--badbg);border-color:var(--bad)}
+  .opt:disabled{cursor:default}
+  .optkey{font-weight:700;color:var(--accent2);margin-right:8px}
+  .explain{background:var(--card2);border-left:3px solid var(--accent);border-radius:8px;padding:11px 13px;
+    margin-top:12px;font-size:.88rem;color:var(--muted)}
+  .explain b{color:var(--txt)}
+  .qhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+
+  /* Flashcards */
+  .flip{perspective:1200px;margin:6px 0 12px}
+  .flipInner{position:relative;width:100%;min-height:220px;transition:transform .5s;transform-style:preserve-3d;cursor:pointer}
+  .flip.flipped .flipInner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
+    padding:24px;border-radius:16px;border:1px solid var(--line)}
+  .front{background:linear-gradient(145deg,#273549,#1e293b)}
+  .back{background:linear-gradient(145deg,#243049,#1b2540);transform:rotateY(180deg)}
+  .face .term{font-size:1.3rem;font-weight:700}
+  .face .def{font-size:1rem;color:var(--txt)}
+  .face .hint{position:absolute;bottom:12px;font-size:.72rem;color:var(--muted)}
+  .fcnav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+  .fcmark{display:flex;gap:10px}
+  .fcmark .btn{flex:1}
+  .known{color:var(--ok);font-weight:600}.unknown{color:var(--warn);font-weight:600}
+
+  /* Matching */
+  .matchrow{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+  .matchterm{flex:1;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:.9rem;font-weight:600}
+  select{flex:1;background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:10px;
+    padding:11px 10px;font-size:.88rem;font-family:inherit;min-height:44px;max-width:55%}
+  .matchrow.ok .matchterm{border-color:var(--ok);background:var(--okbg)}
+  .matchrow.no .matchterm{border-color:var(--bad);background:var(--badbg)}
+  .setblock{margin-bottom:22px}
+  .setttl{font-size:.95rem;font-weight:700;margin:0 0 10px;color:var(--accent2)}
+
+  .empty{color:var(--muted);text-align:center;padding:30px 10px;font-size:.9rem}
+  .hidden{display:none}
+  .foot{color:var(--muted);font-size:.78rem;text-align:center;margin-top:22px}
+  @media(max-width:420px){ .tab{font-size:.82rem} h1{font-size:1.35rem} select{max-width:50%} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🧠 Kuis Interaktif PIO</h1>
+  <p class="sub">Psikologi Industri &amp; Organisasi · Materi Kelompok · 5 Bab</p>
+  <p class="counts" id="counts"></p>
+
+  <div class="tabs">
+    <button class="tab active" data-mode="mc" type="button">📝 Pilihan Ganda</button>
+    <button class="tab" data-mode="fc" type="button">🃏 Flashcards</button>
+    <button class="tab" data-mode="match" type="button">🔀 Cocokkan</button>
+  </div>
+
+  <!-- ===== MC MODE ===== -->
+  <div id="mode-mc">
+    <div class="card">
+      <div class="filters" id="mcBabFilter"><span class="flabel">Bab:</span></div>
+      <div class="filters" id="mcTypeFilter"><span class="flabel">Tipe:</span></div>
+      <div class="toolrow">
+        <span class="score" id="mcScore">0 / 0</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn ghost sm" id="mcShuffle" type="button">🎲 Acak</button>
+          <button class="btn ghost sm" id="mcReset" type="button">🔄 Reset</button>
+        </div>
+      </div>
+    </div>
+    <div id="mcList"></div>
+  </div>
+
+  <!-- ===== FLASHCARD MODE ===== -->
+  <div id="mode-fc" class="hidden">
+    <div class="card">
+      <div class="filters" id="fcBabFilter"><span class="flabel">Bab:</span></div>
+      <div class="toolrow">
+        <span class="score"><span class="known" id="fcKnown">Tahu: 0</span> · <span class="unknown" id="fcUnknown">Belum: 0</span></span>
+        <div style="display:flex;gap:8px">
+          <button class="btn ghost sm" id="fcShuffle" type="button">🎲 Acak</button>
+          <button class="btn ghost sm" id="fcReset" type="button">🔄 Reset</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="fcnav"><span class="pill" id="fcTopic">—</span><span class="pill" id="fcCount">0 / 0</span></div>
+      <div class="flip" id="flip">
+        <div class="flipInner" id="flipInner">
+          <div class="face front"><div class="term" id="fcFront">—</div><div class="hint">ketuk untuk balik</div></div>
+          <div class="face back"><div class="def" id="fcBack">—</div><div class="hint">ketuk untuk balik</div></div>
+        </div>
+      </div>
+      <div class="fcmark">
+        <button class="btn ghost" id="fcPrev" type="button">← Sebelumnya</button>
+        <button class="btn ghost" id="fcNext" type="button">Selanjutnya →</button>
+      </div>
+      <div class="fcmark" style="margin-top:8px">
+        <button class="btn ghost" id="fcNo" type="button">❌ Belum Tahu</button>
+        <button class="btn" id="fcYes" type="button">✓ Sudah Tahu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MATCHING MODE ===== -->
+  <div id="mode-match" class="hidden">
+    <div class="card">
+      <div class="toolrow">
+        <span class="score" id="matchScore">—</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn sm" id="matchCheck" type="button">✅ Cek Jawaban</button>
+          <button class="btn ghost sm" id="matchReset" type="button">🔄 Reset</button>
+        </div>
+      </div>
+    </div>
+    <div id="matchList"></div>
+  </div>
+
+  <p class="foot">Sumber: Kepemimpinan · Kepuasan Kerja · Perilaku Produktif &amp; Kontraproduktif · Psikologi Kesehatan di Dunia Kerja · Work Groups &amp; Teams</p>
+</div>
+
+<script>
+const BAB = {lead:"Kepemimpinan", sat:"Kepuasan Kerja", prod:"Produktif & Kontraproduktif", health:"Kesehatan Kerja", team:"Work Groups & Teams"};
+const TYPES = {Recall:"Recall", Aplikasi:"Aplikasi", Analisis:"Analisis"};
+
+// ---- MC bank (tp = tipe soal) ----
+const MC = [
+  {t:"lead",tp:"Recall",q:"Kekuasaan yang berasal dari posisi/jabatan seseorang dalam organisasi disebut...",o:["Expert power","Legitimate power","Referent power","Reward power"],a:1,e:"Legitimate power = kekuasaan jabatan; bawahan patuh karena mengakui wewenang posisi."},
+  {t:"lead",tp:"Recall",q:"Kekuasaan yang muncul karena rasa hormat, kekaguman, dan kepercayaan terhadap pemimpin disebut...",o:["Coercive power","Reward power","Referent power","Legitimate power"],a:2,e:"Referent power (keteladanan) — orang ingin mengikuti/meneladani pemimpin."},
+  {t:"lead",tp:"Recall",q:"Pendekatan kepemimpinan yang berfokus pada sifat bawaan pemimpin adalah...",o:["Behavioral Approach","Contingency Approach","Trait Approach","Path-Goal Theory"],a:2,e:"Trait Approach: pemimpin efektif memiliki sifat tertentu (cerdas, percaya diri, integritas)."},
+  {t:"lead",tp:"Analisis",q:"Menurut Teori Kontingensi Fiedler, keberhasilan pemimpin ditentukan oleh kesesuaian gaya dengan...",o:["pendidikan bawahan","situasi kerja (hubungan, struktur tugas, kekuatan posisi)","besarnya gaji","usia pemimpin"],a:1,e:"Tidak ada satu gaya cocok untuk semua kondisi — harus sesuai situasi."},
+  {t:"lead",tp:"Recall",q:"Pemimpin yang memotivasi bawahan lewat pertukaran kinerja dan imbalan berciri kepemimpinan...",o:["Transformasional","Transaksional","Karismatik","Laissez-faire"],a:1,e:"Transactional: tetapkan tujuan, beri penghargaan, koreksi bila standar tak terpenuhi."},
+  {t:"lead",tp:"Recall",q:"Dalam teori LMX, hubungan berkualitas tinggi pemimpin–bawahan disebut...",o:["Out-group","In-group","Nominal group","Reference group"],a:1,e:"In-group memperoleh kepercayaan, dukungan, dan kesempatan lebih besar."},
+  {t:"lead",tp:"Recall",q:"Istilah 'glass ceiling' mengacu pada...",o:["transparansi organisasi","hambatan tak terlihat yang menghalangi perempuan ke posisi tinggi","promosi otomatis","keterbukaan gaji"],a:1,e:"Glass ceiling = hambatan perempuan mencapai posisi puncak manajemen."},
+  {t:"lead",tp:"Recall",q:"Empat gaya supervisi Path-Goal Theory: directive, supportive, participative, dan...",o:["coercive","transactional","achievement","referent"],a:2,e:"Path-Goal: supervisor membuka 'jalan' menuju tujuan; gaya disesuaikan situasi."},
+  {t:"lead",tp:"Recall",q:"Kekuasaan dari kemampuan memberi hukuman atau sanksi (teguran, penurunan jabatan) disebut...",o:["Reward power","Coercive power","Expert power","Referent power"],a:1,e:"Coercive power = kekuasaan paksaan/hukuman."},
+  {t:"lead",tp:"Recall",q:"Perilaku pemimpin yang berfokus pada penyelesaian pekerjaan, pembagian tugas, dan pencapaian target disebut...",o:["Relationship-oriented behavior","Task-oriented behavior","Referent behavior","Achievement behavior"],a:1,e:"Behavioral Approach membedakan task-oriented (fokus tugas) & relationship-oriented (fokus hubungan)."},
+  {t:"sat",tp:"Recall",q:"Pendekatan yang melihat kepuasan kerja sebagai perasaan terhadap pekerjaan secara keseluruhan disebut...",o:["The Facet Approach","The Global Approach","Trait Approach","Behavioral Approach"],a:1,e:"Global = keseluruhan; facet = per-aspek."},
+  {t:"sat",tp:"Recall",q:"Pendekatan facet mengukur kepuasan kerja terhadap...",o:["pekerjaan keseluruhan saja","berbagai aspek (gaji, lingkungan, tunjangan)","hanya gaji","hanya atasan"],a:1,e:"Facet approach memberi gambaran rinci tiap aspek pekerjaan."},
+  {t:"sat",tp:"Analisis",q:"Berikut instrumen pengukur kepuasan kerja, KECUALI...",o:["JDI","MSQ","JIG","MBI (Maslach Burnout Inventory)"],a:3,e:"MBI mengukur burnout, bukan kepuasan kerja."},
+  {t:"sat",tp:"Recall",q:"Keadilan atas hasil yang diterima (gaji, bonus, promosi) termasuk...",o:["Procedural justice","Distributive justice","Interactional justice","Global justice"],a:1,e:"Distributive = keadilan hasil; procedural = keadilan proses."},
+  {t:"sat",tp:"Analisis",q:"Hubungan usia dan kepuasan kerja digambarkan berbentuk...",o:["garis lurus menurun","kurva U","garis lurus naik","tidak ada hubungan"],a:1,e:"Kurva U: tinggi di awal, turun di tengah, naik lagi di akhir karier."},
+  {t:"sat",tp:"Aplikasi",q:"Lulusan S2 bekerja di posisi yang hanya butuh lulusan SMA. Kondisi ini disebut...",o:["underemployment","burnout","turnover","overload"],a:0,e:"Underemployment menurunkan kepuasan & motivasi, menaikkan turnover intention."},
+  {t:"sat",tp:"Recall",q:"Komitmen ketika karyawan bertahan karena rugi jika keluar (gaji, tunjangan) disebut...",o:["Affective","Continuance","Normative","Moral"],a:1,e:"Continuance commitment = bertahan karena membutuhkan organisasi."},
+  {t:"sat",tp:"Recall",q:"Deep acting dan surface acting adalah dua cara menghadapi tuntutan...",o:["fisik","emosional (emotional labor)","kognitif","finansial"],a:1,e:"Deep acting lebih sehat; surface acting melelahkan."},
+  {t:"sat",tp:"Aplikasi",q:"Karyawan yang optimis, berpikir positif, dan stabil secara emosional cenderung...",o:["lebih mudah tidak puas","lebih puas terhadap pekerjaannya","tidak terpengaruh kepribadian","selalu ingin pindah kerja"],a:1,e:"Kepribadian positif → cenderung lebih puas; pesimis/fokus negatif → lebih mudah tidak puas."},
+  {t:"sat",tp:"Recall",q:"Dalam job characteristics, kebebasan karyawan menentukan cara bekerja disebut...",o:["Variety","Autonomy","Feedback","Significance"],a:1,e:"Autonomy = kebebasan dalam bekerja; salah satu dari 5 karakteristik pekerjaan."},
+  {t:"prod",tp:"Recall",q:"KSAOs terdiri dari Knowledge, Skill, Abilities, dan...",o:["Objectives","Opportunities","Other Characteristics","Outcomes"],a:2,e:"KSAOs = Knowledge, Skills, Abilities, Other characteristics."},
+  {t:"prod",tp:"Analisis",q:"Dimensi Big Five yang dipandang prediktor kuat keberhasilan kerja adalah...",o:["Extraversion","Openness","Conscientiousness","Neuroticism"],a:2,e:"Conscientious cenderung disiplin, tekun, konsisten berkinerja baik."},
+  {t:"prod",tp:"Recall",q:"Perilaku sukarela di luar tugas formal yang menguntungkan organisasi disebut...",o:["CWB","OCB","KSAO","CSCW"],a:1,e:"OCB: membantu rekan, mematuhi aturan, memberi saran inovatif."},
+  {t:"prod",tp:"Analisis",q:"Berikut termasuk CWB bentuk withdrawal, KECUALI...",o:["Absence","Cyberloafing","Lateness","Altruism"],a:3,e:"Altruism adalah OCB (positif). Withdrawal: absence, cyberloafing, lateness, turnover."},
+  {t:"prod",tp:"Recall",q:"Menggunakan internet/gawai untuk urusan pribadi saat bekerja disebut...",o:["cyberloafing","sabotage","telepressure","social loafing"],a:0,e:"Cyberloafing mengurangi fokus & produktivitas."},
+  {t:"prod",tp:"Aplikasi",q:"Karyawan yang percaya keberhasilannya ditentukan usahanya sendiri memiliki...",o:["locus of control eksternal","locus of control internal","trait anger","negative affectivity"],a:1,e:"Locus internal: proaktif, berinisiatif tinggi, bertanggung jawab."},
+  {t:"prod",tp:"Recall",q:"Merusak alat/memperlambat pekerjaan dengan sengaja untuk menghambat organisasi disebut...",o:["theft","sabotage","aggression","withdrawal"],a:1,e:"Sabotage = bentuk CWB yang merusak/memperlambat kerja secara sengaja."},
+  {t:"prod",tp:"Recall",q:"Dua jenis OCB berdasarkan sasarannya adalah...",o:["altruism & compliance","OCBI & OCBO","internal & eksternal","task & contextual"],a:1,e:"OCBI (ke individu) & OCBO (ke organisasi langsung)."},
+  {t:"prod",tp:"Recall",q:"Proses mengubah ide baru menjadi tindakan nyata dalam pekerjaan disebut...",o:["Creativity","Innovation","Mental model","Compliance"],a:1,e:"Creativity = menghasilkan ide baru; Innovation = menerapkan ide dalam pekerjaan."},
+  {t:"prod",tp:"Recall",q:"Sumber motivasi dari kebutuhan berprestasi, ambisi pribadi, dan nilai hidup disebut motivasi...",o:["eksternal","internal","instrumental","normatif"],a:1,e:"Motivasi internal dari dalam diri; eksternal dari lingkungan (penghargaan, dukungan sosial)."},
+  {t:"health",tp:"Recall",q:"Occupational Health Psychology (OHP) berfokus pada...",o:["keuntungan finansial","kesehatan, keselamatan & kesejahteraan pekerja","strategi pemasaran","rekrutmen"],a:1,e:"OHP mengkaji faktor psikologis yang memengaruhi kesehatan kerja."},
+  {t:"health",tp:"Recall",q:"Pencegahan paparan penyakit menular (sarung tangan, wadah benda tajam, disinfektan) disebut...",o:["Safety climate","Universal Precautions","Flextime","Respite"],a:1,e:"Universal Precautions: sarung tangan, apron, masker, wadah khusus benda tajam."},
+  {t:"health",tp:"Recall",q:"Cedera otot, tulang, dan jaringan ikat akibat gerakan berulang disebut...",o:["Burnout","Musculoskeletal Disorders (MSDs)","Role conflict","Telepressure"],a:1,e:"MSDs berkembang akibat aktivitas fisik berulang di tempat kerja."},
+  {t:"health",tp:"Recall",q:"Ketidakpastian karyawan mengenai fungsi & tanggung jawab pekerjaannya disebut...",o:["Role conflict","Role ambiguity","Workload","Autonomy"],a:1,e:"Role ambiguity = ketidakpastian peran; role conflict = tuntutan berbenturan."},
+  {t:"health",tp:"Analisis",q:"Menurut Demand/Control Model (Karasek, 1979), demands hanya menyebabkan strain ketika...",o:["gaji rendah","control tidak mencukupi","rekan kerja banyak","jam kerja pendek"],a:1,e:"Control berfungsi sebagai stress buffer."},
+  {t:"health",tp:"Recall",q:"MBI mengukur tiga komponen burnout: emotional exhaustion, depersonalization, dan...",o:["role conflict","reduced personal accomplishment","workload","autonomy"],a:1,e:"Reduced personal accomplishment = merasa tak mencapai hal berarti di tempat kerja."},
+  {t:"health",tp:"Recall",q:"Istirahat yang memungkinkan seseorang melepaskan diri secara psikologis dari pekerjaan disebut...",o:["respite","strain","telepressure","workload"],a:0,e:"Respite: micro-break, istirahat makan siang, akhir pekan, hingga liburan."},
+  {t:"health",tp:"Recall",q:"Kebebasan karyawan membuat keputusan tentang pekerjaannya sendiri disebut...",o:["demand","autonomy/control","strain","telepressure"],a:1,e:"Autonomy mencakup cara, tugas, kapan, dan di mana bekerja."},
+  {t:"health",tp:"Recall",q:"Jadwal kerja yang memungkinkan karyawan menentukan sebagian jam kerjanya sendiri disebut...",o:["Night shift","Flextime","Long shift","Fixed shift"],a:1,e:"Flextime mendukung tanggung jawab keluarga; keuntungan organisasi: less absence & tardiness."},
+  {t:"health",tp:"Recall",q:"Reaksi/dampak negatif (psikologis, fisik, perilaku) akibat job stressors disebut...",o:["Job demand","Job strain","Autonomy","Respite"],a:1,e:"Job strain = reaksi negatif akibat stressor: mis. frustrasi, sakit, absen."},
+  {t:"team",tp:"Analisis",q:"Perbedaan utama work group dan work team adalah...",o:["tidak ada beda","work team: tujuan sama, saling membutuhkan, bagian masing-masing","work group selalu lebih besar","work team tak berinteraksi"],a:1,e:"Work group = berbagi tugas terkait; work team = tujuan sama & saling bergantung."},
+  {t:"team",tp:"Recall",q:"Tingkat ketertarikan anggota untuk tetap berada dalam kelompok disebut...",o:["group conflict","group cohesiveness","process loss","social loafing"],a:1,e:"Group cohesiveness = kekompakan / daya tarik tetap di kelompok."},
+  {t:"team",tp:"Recall",q:"Aturan tidak tertulis yang menjadi standar perilaku kelompok disebut...",o:["roles","norms","cohesiveness","mental model"],a:1,e:"Norms = aturan tak tertulis; roles = fungsi tiap anggota."},
+  {t:"team",tp:"Aplikasi",q:"Kinerja seseorang meningkat karena ditonton orang lain pada tugas mudah. Ini contoh...",o:["social inhibition","social facilitation","social loafing","process loss"],a:1,e:"Social facilitation menaikkan kinerja tugas mudah; inhibition menurunkan tugas sulit."},
+  {t:"team",tp:"Recall",q:"Kelompok mengambil keputusan buruk meski sebagian anggota tahu itu salah disebut...",o:["group polarization","groupthink","brainstorming","social loafing"],a:1,e:"Groupthink: tekanan konformitas → keputusan buruk tetap diambil."},
+  {t:"team",tp:"Recall",q:"Waktu & usaha hilang untuk aktivitas non-produksi (koordinasi, konflik) disebut...",o:["social loafing","process loss","group polarization","additive task"],a:1,e:"Process loss + social loafing membuat kelompok interaktif kadang kalah dari nominal."},
+  {t:"team",tp:"Recall",q:"Perbedaan pengetahuan, keterampilan, nilai, dan cara berpikir antaranggota disebut...",o:["demographic diversity","cognitive diversity","process loss","groupthink"],a:1,e:"Cognitive diversity cenderung meningkatkan inovasi tim."},
+  {t:"team",tp:"Recall",q:"Tim dengan otonomi tinggi di mana supervisor berperan sebagai pelatih disebut...",o:["Quality Circles","Autonomous Work Teams","Nominal groups","Virtual teams"],a:1,e:"Autonomous Work Teams: otonomi tinggi, supervisor jadi coach."},
+  {t:"team",tp:"Recall",q:"Tim yang bekerja & berkolaborasi melalui teknologi komunikasi tanpa batasan jarak disebut...",o:["Nominal team","Virtual team","Quality circle","Additive team"],a:1,e:"Virtual teams berkolaborasi lewat teknologi komunikasi tanpa batas lokasi."},
+  {t:"team",tp:"Recall",q:"Pertemuan rutin sekelompok pekerja untuk mencari solusi efisiensi dan kualitas disebut...",o:["Team building","Quality Circles","Brainstorming","Nominal group"],a:1,e:"Quality Circles (lingkar kualitas): pertemuan rutin pekerja untuk solusi efisiensi & kualitas."}
+];
+
+// ---- Flashcards ----
+const FC = [
+  {t:"lead",f:"Legitimate Power",b:"Kekuasaan dari posisi/jabatan; bawahan patuh karena mengakui wewenang."},
+  {t:"lead",f:"Reward Power",b:"Kekuasaan dari kemampuan memberi penghargaan (promosi, bonus, pujian)."},
+  {t:"lead",f:"Coercive Power",b:"Kekuasaan dari kemampuan memberi hukuman/sanksi (teguran, penurunan jabatan)."},
+  {t:"lead",f:"Expert Power",b:"Kekuasaan dari pengetahuan, keterampilan, dan kompetensi seseorang."},
+  {t:"lead",f:"Referent Power",b:"Kekuasaan dari rasa hormat & kekaguman sehingga orang ingin meneladani."},
+  {t:"lead",f:"Transformational Leadership",b:"Menginspirasi & memotivasi bawahan melalui visi bersama dan perubahan positif."},
+  {t:"lead",f:"Transactional Leadership",b:"Memotivasi lewat pertukaran kinerja–imbalan, dengan tindakan korektif."},
+  {t:"lead",f:"LMX Theory",b:"Pemimpin membangun hubungan berbeda tiap bawahan (in-group vs out-group)."},
+  {t:"lead",f:"4 Dimensi Political Skill",b:"Social astuteness, interpersonal influence, networking ability, apparent sincerity."},
+  {t:"lead",f:"Abusive Supervision",b:"Stresor sosial dari perilaku atasan yang memicu strain pada karyawan."},
+  {t:"sat",f:"Global vs Facet Approach",b:"Global = kepuasan keseluruhan; Facet = kepuasan per-aspek pekerjaan."},
+  {t:"sat",f:"Organizational Justice",b:"Distributive (keadilan hasil) & Procedural (keadilan proses keputusan)."},
+  {t:"sat",f:"Underemployment",b:"Pendidikan/keterampilan/pengalaman tak dimanfaatkan secara maksimal."},
+  {t:"sat",f:"3 Komponen Komitmen",b:"Affective (ingin), Continuance (butuh/rugi keluar), Normative (wajib)."},
+  {t:"sat",f:"Emotional Labor",b:"Deep acting (ubah perasaan, lebih sehat) vs surface acting (pura-pura, melelahkan)."},
+  {t:"sat",f:"Environmental Antecedents",b:"Faktor lingkungan kepuasan: job characteristics, pay, organizational justice."},
+  {t:"prod",f:"KSAOs",b:"Knowledge, Skills, Abilities, Other characteristics — fondasi kinerja."},
+  {t:"prod",f:"OCB",b:"Perilaku sukarela di luar tugas formal yang menguntungkan organisasi."},
+  {t:"prod",f:"OCBI vs OCBO",b:"OCBI menyasar individu; OCBO menyasar organisasi secara langsung."},
+  {t:"prod",f:"CWB",b:"Perilaku yang sengaja merugikan organisasi atau anggotanya."},
+  {t:"prod",f:"Withdrawal Behavior",b:"Menarik diri: absence, cyberloafing, lateness, turnover."},
+  {t:"prod",f:"Locus of Control",b:"Internal (hasil = usaha sendiri) vs Eksternal (hasil = faktor luar/keberuntungan)."},
+  {t:"prod",f:"Conscientiousness",b:"Dimensi Big Five; prediktor kuat kinerja (disiplin, tekun, terorganisasi)."},
+  {t:"health",f:"OHP",b:"Occupational Health Psychology: fokus kesehatan, keselamatan, kesejahteraan pekerja."},
+  {t:"health",f:"Universal Precautions",b:"Prosedur pencegahan paparan penyakit menular (sarung tangan, masker, wadah benda tajam)."},
+  {t:"health",f:"MSDs",b:"Musculoskeletal Disorders: cedera otot/tulang akibat gerakan berulang."},
+  {t:"health",f:"Role Ambiguity vs Conflict",b:"Ambiguity = ketidakpastian peran; Conflict = tuntutan yang berbenturan."},
+  {t:"health",f:"Demand/Control Model",b:"Karasek (1979): demands memicu strain hanya bila control tidak cukup."},
+  {t:"health",f:"Burnout (MBI)",b:"Emotional exhaustion, depersonalization, reduced personal accomplishment."},
+  {t:"health",f:"Work–Family Conflict",b:"Tuntutan pekerjaan & keluarga berbenturan dan tak bisa dipenuhi sekaligus."},
+  {t:"team",f:"Work Group vs Work Team",b:"Group = berbagi tugas terkait; Team = tujuan sama & saling bergantung."},
+  {t:"team",f:"Group Cohesiveness",b:"Tingkat ketertarikan anggota untuk tetap berada dalam kelompok."},
+  {t:"team",f:"Norms vs Roles",b:"Norms = aturan tak tertulis; Roles = fungsi spesifik tiap anggota."},
+  {t:"team",f:"Social Facilitation vs Inhibition",b:"Naik pada tugas mudah; turun pada tugas sulit/baru."},
+  {t:"team",f:"Groupthink",b:"Kelompok ambil keputusan buruk demi konformitas meski sebagian tahu salah."},
+  {t:"team",f:"Group Polarization",b:"Keputusan kelompok jadi lebih ekstrem dari rata-rata keputusan individu."},
+  {t:"team",f:"Process Loss",b:"Waktu & usaha yang hilang untuk aktivitas non-produksi (koordinasi, konflik)."},
+  {t:"team",f:"3 Intervensi Kelompok Kerja",b:"Team building, autonomous work teams, quality circles."}
+];
+
+// ---- Matching sets ----
+const MATCH = [
+  {title:"Set 1 · Sumber Kekuasaan (Kepemimpinan)", pairs:[
+    ["Legitimate Power","Kekuasaan dari jabatan/posisi"],
+    ["Reward Power","Kekuasaan memberi penghargaan"],
+    ["Coercive Power","Kekuasaan memberi hukuman/sanksi"],
+    ["Expert Power","Kekuasaan dari keahlian/pengetahuan"],
+    ["Referent Power","Kekuasaan dari keteladanan & rasa hormat"]
+  ]},
+  {title:"Set 2 · Kepuasan & Perilaku Kerja", pairs:[
+    ["Distributive Justice","Keadilan atas hasil (gaji, bonus)"],
+    ["Procedural Justice","Keadilan proses pengambilan keputusan"],
+    ["OCB","Perilaku sukarela yang menguntungkan organisasi"],
+    ["CWB","Perilaku sengaja merugikan organisasi"],
+    ["Underemployment","Keterampilan tak dimanfaatkan maksimal"]
+  ]},
+  {title:"Set 3 · Kesehatan Kerja & Tim", pairs:[
+    ["Burnout","Kelelahan emosional & sikap sinis"],
+    ["Role Ambiguity","Ketidakpastian tanggung jawab kerja"],
+    ["Demand/Control Model","Control berperan sebagai stress buffer"],
+    ["Groupthink","Keputusan buruk demi konformitas"],
+    ["Process Loss","Usaha hilang untuk koordinasi & konflik"]
+  ]}
+];
+
+document.getElementById('counts').textContent = `${MC.length} soal · ${FC.length} flashcard · ${MATCH.length} set cocokkan`;
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+/* ===== MODE SWITCH ===== */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const m=tab.dataset.mode;
+    ['mc','fc','match'].forEach(x=>document.getElementById('mode-'+x).classList.toggle('hidden',x!==m));
+    window.scrollTo(0,0);
+  };
+});
+
+/* ===== MC ===== */
+let mcBab='all', mcType='all', mcOrder=null, mcState={};
+function buildFilterChips(container,map,current,cb){
+  container.querySelectorAll('.chip').forEach(c=>c.remove());
+  const add=(key,label)=>{const b=document.createElement('button');b.className='chip'+(current===key?' on':'');
+    b.textContent=label;b.type='button';b.onclick=()=>cb(key);container.appendChild(b);};
+  add('all','Semua');
+  for(const [k,v] of Object.entries(map)) add(k,v);
+}
+function mcFilteredList(){
+  let list = MC.map((q,i)=>({q,i})).filter(x=>(mcBab==='all'||x.q.t===mcBab)&&(mcType==='all'||x.q.tp===mcType));
+  if(mcOrder){ const pos={}; mcOrder.forEach((id,idx)=>pos[id]=idx); list.sort((a,b)=>(pos[a.i]??0)-(pos[b.i]??0)); }
+  return list;
+}
+function renderMC(){
+  buildFilterChips(document.getElementById('mcBabFilter'),BAB,mcBab,k=>{mcBab=k;renderMC();});
+  buildFilterChips(document.getElementById('mcTypeFilter'),TYPES,mcType,k=>{mcType=k;renderMC();});
+  const list=mcFilteredList();
+  const wrap=document.getElementById('mcList');wrap.innerHTML='';
+  if(!list.length){wrap.innerHTML='<div class="card empty">Tidak ada soal untuk filter ini.</div>';updateMcScore();return;}
+  const keys=['A','B','C','D','E'];
+  list.forEach(({q,i},n)=>{
+    const card=document.createElement('div');card.className='card';
+    card.innerHTML=`<div class="qhead"><span class="badge">${n+1}. ${BAB[q.t]}</span><span class="pill">${q.tp}</span></div>
+      <div class="qtext">${q.q}</div>`;
+    const body=document.createElement('div');
+    q.o.forEach((opt,oi)=>{
+      const btn=document.createElement('button');btn.className='opt';btn.type='button';
+      btn.innerHTML=`<span class="optkey">${keys[oi]}.</span>${opt}`;
+      const st=mcState[i];
+      if(st!==undefined){btn.disabled=true;
+        if(oi===q.a)btn.classList.add('correct');
+        if(oi===st&&st!==q.a)btn.classList.add('wrong');}
+      btn.onclick=()=>{
+        mcState[i]=oi;
+        renderMC();
+      };
+      body.appendChild(btn);
+    });
+    card.appendChild(body);
+    if(mcState[i]!==undefined){
+      const ok=mcState[i]===q.a;
+      const ex=document.createElement('div');ex.className='explain';
+      ex.innerHTML=`<b>${ok?'✅ Benar!':'❌ Kurang tepat.'}</b> ${q.e}`;
+      card.appendChild(ex);
+    }
+    wrap.appendChild(card);
+  });
+  updateMcScore();
+}
+function updateMcScore(){
+  const list=mcFilteredList();
+  let ans=0,cor=0;
+  list.forEach(({q,i})=>{if(mcState[i]!==undefined){ans++;if(mcState[i]===q.a)cor++;}});
+  document.getElementById('mcScore').textContent=`${cor} / ${ans}`;
+}
+document.getElementById('mcShuffle').onclick=()=>{mcOrder=shuffle(MC.map((_,i)=>i));renderMC();window.scrollTo(0,0);};
+document.getElementById('mcReset').onclick=()=>{mcState={};mcOrder=null;mcBab='all';mcType='all';renderMC();window.scrollTo(0,0);};
+
+/* ===== FLASHCARDS ===== */
+let fcBab='all', fcDeck=[], fcIdx=0, fcMark={};
+function fcBuild(){
+  fcDeck=FC.map((c,i)=>({c,i})).filter(x=>fcBab==='all'||x.c.t===fcBab);
+  fcIdx=0;renderFC();
+}
+function renderFC(){
+  buildFilterChips(document.getElementById('fcBabFilter'),BAB,fcBab,k=>{fcBab=k;fcBuild();});
+  const flip=document.getElementById('flip');flip.classList.remove('flipped');
+  if(!fcDeck.length){document.getElementById('fcFront').textContent='Tidak ada kartu';document.getElementById('fcBack').textContent='—';
+    document.getElementById('fcTopic').textContent='—';document.getElementById('fcCount').textContent='0 / 0';updateFcCounts();return;}
+  const {c}=fcDeck[fcIdx];
+  document.getElementById('fcFront').textContent=c.f;
+  document.getElementById('fcBack').textContent=c.b;
+  document.getElementById('fcTopic').textContent=BAB[c.t];
+  document.getElementById('fcCount').textContent=`${fcIdx+1} / ${fcDeck.length}`;
+  updateFcCounts();
+}
+function updateFcCounts(){
+  let k=0,u=0;Object.values(fcMark).forEach(v=>v?k++:u++);
+  document.getElementById('fcKnown').textContent=`Tahu: ${k}`;
+  document.getElementById('fcUnknown').textContent=`Belum: ${u}`;
+}
+document.getElementById('flipInner').onclick=()=>document.getElementById('flip').classList.toggle('flipped');
+document.getElementById('fcPrev').onclick=()=>{if(fcDeck.length){fcIdx=(fcIdx-1+fcDeck.length)%fcDeck.length;renderFC();}};
+document.getElementById('fcNext').onclick=()=>{if(fcDeck.length){fcIdx=(fcIdx+1)%fcDeck.length;renderFC();}};
+document.getElementById('fcYes').onclick=()=>{if(fcDeck.length){fcMark[fcDeck[fcIdx].i]=true;nextFc();}};
+document.getElementById('fcNo').onclick=()=>{if(fcDeck.length){fcMark[fcDeck[fcIdx].i]=false;nextFc();}};
+function nextFc(){fcIdx=(fcIdx+1)%fcDeck.length;renderFC();}
+document.getElementById('fcShuffle').onclick=()=>{fcDeck=shuffle(fcDeck);fcIdx=0;renderFC();};
+document.getElementById('fcReset').onclick=()=>{fcMark={};fcBab='all';fcBuild();};
+
+/* ===== MATCHING ===== */
+function renderMatch(){
+  const wrap=document.getElementById('matchList');wrap.innerHTML='';
+  MATCH.forEach((set,si)=>{
+    const block=document.createElement('div');block.className='card setblock';
+    block.innerHTML=`<p class="setttl">${set.title}</p>`;
+    const defs=shuffle(set.pairs.map((p,i)=>({txt:p[1],idx:i})));
+    set.pairs.forEach((p,ri)=>{
+      const row=document.createElement('div');row.className='matchrow';row.dataset.set=si;row.dataset.correct=ri;
+      const term=document.createElement('div');term.className='matchterm';term.textContent=p[0];
+      const sel=document.createElement('select');sel.dataset.set=si;sel.dataset.row=ri;
+      sel.innerHTML='<option value="">— pilih —</option>'+defs.map(d=>`<option value="${d.idx}">${d.txt}</option>`).join('');
+      row.appendChild(term);row.appendChild(sel);block.appendChild(row);
+    });
+    wrap.appendChild(block);
+  });
+  document.getElementById('matchScore').textContent='—';
+}
+document.getElementById('matchCheck').onclick=()=>{
+  let cor=0,tot=0;
+  document.querySelectorAll('#matchList .matchrow').forEach(row=>{
+    tot++;
+    const sel=row.querySelector('select');
+    const chosen=sel.value;const correct=row.dataset.correct;
+    row.classList.remove('ok','no');
+    if(chosen!==''){ if(chosen===correct){row.classList.add('ok');cor++;} else row.classList.add('no'); }
+  });
+  document.getElementById('matchScore').textContent=`${cor} / ${tot} benar`;
+};
+document.getElementById('matchReset').onclick=()=>renderMatch();
+
+/* init */
+renderMC();fcBuild();renderMatch();
+</script>
+</body>
+</html>
