@@ -26,13 +26,11 @@
     background:var(--card2);color:var(--accent2);border:1px solid var(--line);margin-bottom:10px}
   .pill{font-size:.72rem;padding:3px 9px;border-radius:999px;background:var(--card2);border:1px solid var(--line);color:var(--muted)}
 
-  /* mode tabs */
   .tabs{display:flex;gap:8px;margin-bottom:16px}
   .tab{flex:1;background:var(--card2);border:1px solid var(--line);color:var(--txt);padding:12px 6px;border-radius:12px;
     cursor:pointer;font-size:.9rem;font-weight:600;text-align:center;transition:.15s;min-height:48px}
   .tab.active{background:var(--accent);border-color:var(--accent);color:#fff}
 
-  /* filters */
   .filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px}
   .flabel{color:var(--muted);font-size:.8rem;margin-right:2px}
   .chip{background:var(--card2);border:1px solid var(--line);color:var(--txt);padding:7px 12px;border-radius:999px;
@@ -46,22 +44,23 @@
   .btn.sm{padding:9px 14px;font-size:.85rem}
   .score{font-weight:700;color:var(--accent2);font-size:.95rem}
 
-  /* MC */
   .qtext{font-size:1.05rem;font-weight:600;margin:4px 0 14px}
   .opt{display:block;width:100%;text-align:left;background:var(--card2);border:1px solid var(--line);
-    color:var(--txt);padding:13px 15px;border-radius:12px;margin-bottom:9px;cursor:pointer;font-size:.96rem;
+    color:var(--txt);padding:13px 15px;border-radius:12px;margin-bottom:4px;cursor:pointer;font-size:.96rem;
     transition:.12s;min-height:48px}
-  .opt:hover:not(:disabled){border-color:var(--accent)}
+  .opt:hover{border-color:var(--accent)}
   .opt.correct{background:var(--okbg);border-color:var(--ok)}
   .opt.wrong{background:var(--badbg);border-color:var(--bad)}
-  .opt:disabled{cursor:default}
   .optkey{font-weight:700;color:var(--accent2);margin-right:8px}
+  .onote{font-size:.82rem;color:var(--muted);margin:0 0 10px;padding:2px 6px 2px 16px;line-height:1.45}
+  .onote.good{color:#86efac}
+  .onote.bad{color:#fca5a5}
   .explain{background:var(--card2);border-left:3px solid var(--accent);border-radius:8px;padding:11px 13px;
-    margin-top:12px;font-size:.88rem;color:var(--muted)}
+    margin-top:8px;font-size:.88rem;color:var(--muted)}
   .explain b{color:var(--txt)}
+  .tip{font-size:.78rem;color:var(--muted);margin:2px 0 10px;font-style:italic}
   .qhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
 
-  /* Flashcards */
   .flip{perspective:1200px;margin:6px 0 12px}
   .flipInner{position:relative;width:100%;min-height:220px;transition:transform .5s;transform-style:preserve-3d;cursor:pointer}
   .flip.flipped .flipInner{transform:rotateY(180deg)}
@@ -78,7 +77,6 @@
   .fcmark .btn{flex:1}
   .known{color:var(--ok);font-weight:600}.unknown{color:var(--warn);font-weight:600}
 
-  /* Matching */
   .matchrow{display:flex;gap:10px;align-items:center;margin-bottom:10px}
   .matchterm{flex:1;background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;font-size:.9rem;font-weight:600}
   select{flex:1;background:var(--card2);color:var(--txt);border:1px solid var(--line);border-radius:10px;
@@ -174,58 +172,62 @@
 const BAB = {lead:"Kepemimpinan", sat:"Kepuasan Kerja", prod:"Produktif & Kontraproduktif", health:"Kesehatan Kerja", team:"Work Groups & Teams"};
 const TYPES = {Recall:"Recall", Aplikasi:"Aplikasi", Analisis:"Analisis"};
 
-// ---- MC bank (tp = tipe soal) ----
+// MC: o = opsi, a = index benar, e = penjelasan utama, oe = penjelasan tiap opsi
 const MC = [
-  {t:"lead",tp:"Recall",q:"Kekuasaan yang berasal dari posisi/jabatan seseorang dalam organisasi disebut...",o:["Expert power","Legitimate power","Referent power","Reward power"],a:1,e:"Legitimate power = kekuasaan jabatan; bawahan patuh karena mengakui wewenang posisi."},
-  {t:"lead",tp:"Recall",q:"Kekuasaan yang muncul karena rasa hormat, kekaguman, dan kepercayaan terhadap pemimpin disebut...",o:["Coercive power","Reward power","Referent power","Legitimate power"],a:2,e:"Referent power (keteladanan) — orang ingin mengikuti/meneladani pemimpin."},
-  {t:"lead",tp:"Recall",q:"Pendekatan kepemimpinan yang berfokus pada sifat bawaan pemimpin adalah...",o:["Behavioral Approach","Contingency Approach","Trait Approach","Path-Goal Theory"],a:2,e:"Trait Approach: pemimpin efektif memiliki sifat tertentu (cerdas, percaya diri, integritas)."},
-  {t:"lead",tp:"Analisis",q:"Menurut Teori Kontingensi Fiedler, keberhasilan pemimpin ditentukan oleh kesesuaian gaya dengan...",o:["pendidikan bawahan","situasi kerja (hubungan, struktur tugas, kekuatan posisi)","besarnya gaji","usia pemimpin"],a:1,e:"Tidak ada satu gaya cocok untuk semua kondisi — harus sesuai situasi."},
-  {t:"lead",tp:"Recall",q:"Pemimpin yang memotivasi bawahan lewat pertukaran kinerja dan imbalan berciri kepemimpinan...",o:["Transformasional","Transaksional","Karismatik","Laissez-faire"],a:1,e:"Transactional: tetapkan tujuan, beri penghargaan, koreksi bila standar tak terpenuhi."},
-  {t:"lead",tp:"Recall",q:"Dalam teori LMX, hubungan berkualitas tinggi pemimpin–bawahan disebut...",o:["Out-group","In-group","Nominal group","Reference group"],a:1,e:"In-group memperoleh kepercayaan, dukungan, dan kesempatan lebih besar."},
-  {t:"lead",tp:"Recall",q:"Istilah 'glass ceiling' mengacu pada...",o:["transparansi organisasi","hambatan tak terlihat yang menghalangi perempuan ke posisi tinggi","promosi otomatis","keterbukaan gaji"],a:1,e:"Glass ceiling = hambatan perempuan mencapai posisi puncak manajemen."},
-  {t:"lead",tp:"Recall",q:"Empat gaya supervisi Path-Goal Theory: directive, supportive, participative, dan...",o:["coercive","transactional","achievement","referent"],a:2,e:"Path-Goal: supervisor membuka 'jalan' menuju tujuan; gaya disesuaikan situasi."},
-  {t:"lead",tp:"Recall",q:"Kekuasaan dari kemampuan memberi hukuman atau sanksi (teguran, penurunan jabatan) disebut...",o:["Reward power","Coercive power","Expert power","Referent power"],a:1,e:"Coercive power = kekuasaan paksaan/hukuman."},
-  {t:"lead",tp:"Recall",q:"Perilaku pemimpin yang berfokus pada penyelesaian pekerjaan, pembagian tugas, dan pencapaian target disebut...",o:["Relationship-oriented behavior","Task-oriented behavior","Referent behavior","Achievement behavior"],a:1,e:"Behavioral Approach membedakan task-oriented (fokus tugas) & relationship-oriented (fokus hubungan)."},
-  {t:"sat",tp:"Recall",q:"Pendekatan yang melihat kepuasan kerja sebagai perasaan terhadap pekerjaan secara keseluruhan disebut...",o:["The Facet Approach","The Global Approach","Trait Approach","Behavioral Approach"],a:1,e:"Global = keseluruhan; facet = per-aspek."},
-  {t:"sat",tp:"Recall",q:"Pendekatan facet mengukur kepuasan kerja terhadap...",o:["pekerjaan keseluruhan saja","berbagai aspek (gaji, lingkungan, tunjangan)","hanya gaji","hanya atasan"],a:1,e:"Facet approach memberi gambaran rinci tiap aspek pekerjaan."},
-  {t:"sat",tp:"Analisis",q:"Berikut instrumen pengukur kepuasan kerja, KECUALI...",o:["JDI","MSQ","JIG","MBI (Maslach Burnout Inventory)"],a:3,e:"MBI mengukur burnout, bukan kepuasan kerja."},
-  {t:"sat",tp:"Recall",q:"Keadilan atas hasil yang diterima (gaji, bonus, promosi) termasuk...",o:["Procedural justice","Distributive justice","Interactional justice","Global justice"],a:1,e:"Distributive = keadilan hasil; procedural = keadilan proses."},
-  {t:"sat",tp:"Analisis",q:"Hubungan usia dan kepuasan kerja digambarkan berbentuk...",o:["garis lurus menurun","kurva U","garis lurus naik","tidak ada hubungan"],a:1,e:"Kurva U: tinggi di awal, turun di tengah, naik lagi di akhir karier."},
-  {t:"sat",tp:"Aplikasi",q:"Lulusan S2 bekerja di posisi yang hanya butuh lulusan SMA. Kondisi ini disebut...",o:["underemployment","burnout","turnover","overload"],a:0,e:"Underemployment menurunkan kepuasan & motivasi, menaikkan turnover intention."},
-  {t:"sat",tp:"Recall",q:"Komitmen ketika karyawan bertahan karena rugi jika keluar (gaji, tunjangan) disebut...",o:["Affective","Continuance","Normative","Moral"],a:1,e:"Continuance commitment = bertahan karena membutuhkan organisasi."},
-  {t:"sat",tp:"Recall",q:"Deep acting dan surface acting adalah dua cara menghadapi tuntutan...",o:["fisik","emosional (emotional labor)","kognitif","finansial"],a:1,e:"Deep acting lebih sehat; surface acting melelahkan."},
-  {t:"sat",tp:"Aplikasi",q:"Karyawan yang optimis, berpikir positif, dan stabil secara emosional cenderung...",o:["lebih mudah tidak puas","lebih puas terhadap pekerjaannya","tidak terpengaruh kepribadian","selalu ingin pindah kerja"],a:1,e:"Kepribadian positif → cenderung lebih puas; pesimis/fokus negatif → lebih mudah tidak puas."},
-  {t:"sat",tp:"Recall",q:"Dalam job characteristics, kebebasan karyawan menentukan cara bekerja disebut...",o:["Variety","Autonomy","Feedback","Significance"],a:1,e:"Autonomy = kebebasan dalam bekerja; salah satu dari 5 karakteristik pekerjaan."},
-  {t:"prod",tp:"Recall",q:"KSAOs terdiri dari Knowledge, Skill, Abilities, dan...",o:["Objectives","Opportunities","Other Characteristics","Outcomes"],a:2,e:"KSAOs = Knowledge, Skills, Abilities, Other characteristics."},
-  {t:"prod",tp:"Analisis",q:"Dimensi Big Five yang dipandang prediktor kuat keberhasilan kerja adalah...",o:["Extraversion","Openness","Conscientiousness","Neuroticism"],a:2,e:"Conscientious cenderung disiplin, tekun, konsisten berkinerja baik."},
-  {t:"prod",tp:"Recall",q:"Perilaku sukarela di luar tugas formal yang menguntungkan organisasi disebut...",o:["CWB","OCB","KSAO","CSCW"],a:1,e:"OCB: membantu rekan, mematuhi aturan, memberi saran inovatif."},
-  {t:"prod",tp:"Analisis",q:"Berikut termasuk CWB bentuk withdrawal, KECUALI...",o:["Absence","Cyberloafing","Lateness","Altruism"],a:3,e:"Altruism adalah OCB (positif). Withdrawal: absence, cyberloafing, lateness, turnover."},
-  {t:"prod",tp:"Recall",q:"Menggunakan internet/gawai untuk urusan pribadi saat bekerja disebut...",o:["cyberloafing","sabotage","telepressure","social loafing"],a:0,e:"Cyberloafing mengurangi fokus & produktivitas."},
-  {t:"prod",tp:"Aplikasi",q:"Karyawan yang percaya keberhasilannya ditentukan usahanya sendiri memiliki...",o:["locus of control eksternal","locus of control internal","trait anger","negative affectivity"],a:1,e:"Locus internal: proaktif, berinisiatif tinggi, bertanggung jawab."},
-  {t:"prod",tp:"Recall",q:"Merusak alat/memperlambat pekerjaan dengan sengaja untuk menghambat organisasi disebut...",o:["theft","sabotage","aggression","withdrawal"],a:1,e:"Sabotage = bentuk CWB yang merusak/memperlambat kerja secara sengaja."},
-  {t:"prod",tp:"Recall",q:"Dua jenis OCB berdasarkan sasarannya adalah...",o:["altruism & compliance","OCBI & OCBO","internal & eksternal","task & contextual"],a:1,e:"OCBI (ke individu) & OCBO (ke organisasi langsung)."},
-  {t:"prod",tp:"Recall",q:"Proses mengubah ide baru menjadi tindakan nyata dalam pekerjaan disebut...",o:["Creativity","Innovation","Mental model","Compliance"],a:1,e:"Creativity = menghasilkan ide baru; Innovation = menerapkan ide dalam pekerjaan."},
-  {t:"prod",tp:"Recall",q:"Sumber motivasi dari kebutuhan berprestasi, ambisi pribadi, dan nilai hidup disebut motivasi...",o:["eksternal","internal","instrumental","normatif"],a:1,e:"Motivasi internal dari dalam diri; eksternal dari lingkungan (penghargaan, dukungan sosial)."},
-  {t:"health",tp:"Recall",q:"Occupational Health Psychology (OHP) berfokus pada...",o:["keuntungan finansial","kesehatan, keselamatan & kesejahteraan pekerja","strategi pemasaran","rekrutmen"],a:1,e:"OHP mengkaji faktor psikologis yang memengaruhi kesehatan kerja."},
-  {t:"health",tp:"Recall",q:"Pencegahan paparan penyakit menular (sarung tangan, wadah benda tajam, disinfektan) disebut...",o:["Safety climate","Universal Precautions","Flextime","Respite"],a:1,e:"Universal Precautions: sarung tangan, apron, masker, wadah khusus benda tajam."},
-  {t:"health",tp:"Recall",q:"Cedera otot, tulang, dan jaringan ikat akibat gerakan berulang disebut...",o:["Burnout","Musculoskeletal Disorders (MSDs)","Role conflict","Telepressure"],a:1,e:"MSDs berkembang akibat aktivitas fisik berulang di tempat kerja."},
-  {t:"health",tp:"Recall",q:"Ketidakpastian karyawan mengenai fungsi & tanggung jawab pekerjaannya disebut...",o:["Role conflict","Role ambiguity","Workload","Autonomy"],a:1,e:"Role ambiguity = ketidakpastian peran; role conflict = tuntutan berbenturan."},
-  {t:"health",tp:"Analisis",q:"Menurut Demand/Control Model (Karasek, 1979), demands hanya menyebabkan strain ketika...",o:["gaji rendah","control tidak mencukupi","rekan kerja banyak","jam kerja pendek"],a:1,e:"Control berfungsi sebagai stress buffer."},
-  {t:"health",tp:"Recall",q:"MBI mengukur tiga komponen burnout: emotional exhaustion, depersonalization, dan...",o:["role conflict","reduced personal accomplishment","workload","autonomy"],a:1,e:"Reduced personal accomplishment = merasa tak mencapai hal berarti di tempat kerja."},
-  {t:"health",tp:"Recall",q:"Istirahat yang memungkinkan seseorang melepaskan diri secara psikologis dari pekerjaan disebut...",o:["respite","strain","telepressure","workload"],a:0,e:"Respite: micro-break, istirahat makan siang, akhir pekan, hingga liburan."},
-  {t:"health",tp:"Recall",q:"Kebebasan karyawan membuat keputusan tentang pekerjaannya sendiri disebut...",o:["demand","autonomy/control","strain","telepressure"],a:1,e:"Autonomy mencakup cara, tugas, kapan, dan di mana bekerja."},
-  {t:"health",tp:"Recall",q:"Jadwal kerja yang memungkinkan karyawan menentukan sebagian jam kerjanya sendiri disebut...",o:["Night shift","Flextime","Long shift","Fixed shift"],a:1,e:"Flextime mendukung tanggung jawab keluarga; keuntungan organisasi: less absence & tardiness."},
-  {t:"health",tp:"Recall",q:"Reaksi/dampak negatif (psikologis, fisik, perilaku) akibat job stressors disebut...",o:["Job demand","Job strain","Autonomy","Respite"],a:1,e:"Job strain = reaksi negatif akibat stressor: mis. frustrasi, sakit, absen."},
-  {t:"team",tp:"Analisis",q:"Perbedaan utama work group dan work team adalah...",o:["tidak ada beda","work team: tujuan sama, saling membutuhkan, bagian masing-masing","work group selalu lebih besar","work team tak berinteraksi"],a:1,e:"Work group = berbagi tugas terkait; work team = tujuan sama & saling bergantung."},
-  {t:"team",tp:"Recall",q:"Tingkat ketertarikan anggota untuk tetap berada dalam kelompok disebut...",o:["group conflict","group cohesiveness","process loss","social loafing"],a:1,e:"Group cohesiveness = kekompakan / daya tarik tetap di kelompok."},
-  {t:"team",tp:"Recall",q:"Aturan tidak tertulis yang menjadi standar perilaku kelompok disebut...",o:["roles","norms","cohesiveness","mental model"],a:1,e:"Norms = aturan tak tertulis; roles = fungsi tiap anggota."},
-  {t:"team",tp:"Aplikasi",q:"Kinerja seseorang meningkat karena ditonton orang lain pada tugas mudah. Ini contoh...",o:["social inhibition","social facilitation","social loafing","process loss"],a:1,e:"Social facilitation menaikkan kinerja tugas mudah; inhibition menurunkan tugas sulit."},
-  {t:"team",tp:"Recall",q:"Kelompok mengambil keputusan buruk meski sebagian anggota tahu itu salah disebut...",o:["group polarization","groupthink","brainstorming","social loafing"],a:1,e:"Groupthink: tekanan konformitas → keputusan buruk tetap diambil."},
-  {t:"team",tp:"Recall",q:"Waktu & usaha hilang untuk aktivitas non-produksi (koordinasi, konflik) disebut...",o:["social loafing","process loss","group polarization","additive task"],a:1,e:"Process loss + social loafing membuat kelompok interaktif kadang kalah dari nominal."},
-  {t:"team",tp:"Recall",q:"Perbedaan pengetahuan, keterampilan, nilai, dan cara berpikir antaranggota disebut...",o:["demographic diversity","cognitive diversity","process loss","groupthink"],a:1,e:"Cognitive diversity cenderung meningkatkan inovasi tim."},
-  {t:"team",tp:"Recall",q:"Tim dengan otonomi tinggi di mana supervisor berperan sebagai pelatih disebut...",o:["Quality Circles","Autonomous Work Teams","Nominal groups","Virtual teams"],a:1,e:"Autonomous Work Teams: otonomi tinggi, supervisor jadi coach."},
-  {t:"team",tp:"Recall",q:"Tim yang bekerja & berkolaborasi melalui teknologi komunikasi tanpa batasan jarak disebut...",o:["Nominal team","Virtual team","Quality circle","Additive team"],a:1,e:"Virtual teams berkolaborasi lewat teknologi komunikasi tanpa batas lokasi."},
-  {t:"team",tp:"Recall",q:"Pertemuan rutin sekelompok pekerja untuk mencari solusi efisiensi dan kualitas disebut...",o:["Team building","Quality Circles","Brainstorming","Nominal group"],a:1,e:"Quality Circles (lingkar kualitas): pertemuan rutin pekerja untuk solusi efisiensi & kualitas."}
+  {t:"lead",tp:"Recall",q:"Kekuasaan yang berasal dari posisi/jabatan seseorang dalam organisasi disebut...",o:["Expert power","Legitimate power","Referent power","Reward power"],a:1,e:"Legitimate power = kekuasaan jabatan; bawahan patuh karena mengakui wewenang posisi.",oe:["Expert power = kekuasaan dari keahlian/pengetahuan, bukan jabatan.","✔ Legitimate power = kekuasaan dari posisi/jabatan; bawahan mengakui wewenang.","Referent power = kekuasaan dari rasa hormat & keteladanan.","Reward power = kekuasaan dari kemampuan memberi penghargaan."]},
+  {t:"lead",tp:"Recall",q:"Kekuasaan yang muncul karena rasa hormat, kekaguman, dan kepercayaan terhadap pemimpin disebut...",o:["Coercive power","Reward power","Referent power","Legitimate power"],a:2,e:"Referent power (keteladanan) — orang ingin mengikuti/meneladani pemimpin.",oe:["Coercive power = kekuasaan dari kemampuan memberi hukuman.","Reward power = kekuasaan dari kemampuan memberi penghargaan.","✔ Referent power = muncul dari rasa hormat, kagum, ingin meneladani.","Legitimate power = kekuasaan dari jabatan/posisi."]},
+  {t:"lead",tp:"Recall",q:"Pendekatan kepemimpinan yang berfokus pada sifat bawaan pemimpin adalah...",o:["Behavioral Approach","Contingency Approach","Trait Approach","Path-Goal Theory"],a:2,e:"Trait Approach: pemimpin efektif memiliki sifat tertentu (cerdas, percaya diri, integritas).",oe:["Behavioral = fokus pada perilaku/tindakan pemimpin, bukan sifat bawaan.","Contingency = efektivitas bergantung pada situasi.","✔ Trait Approach = fokus pada sifat/karakteristik bawaan pemimpin.","Path-Goal = supervisor membuka 'jalan' ke tujuan sesuai situasi."]},
+  {t:"lead",tp:"Analisis",q:"Menurut Teori Kontingensi Fiedler, keberhasilan pemimpin ditentukan oleh kesesuaian gaya dengan...",o:["pendidikan bawahan","situasi kerja (hubungan, struktur tugas, kekuatan posisi)","besarnya gaji","usia pemimpin"],a:1,e:"Tidak ada satu gaya cocok untuk semua kondisi — harus sesuai situasi.",oe:["Pendidikan bawahan bukan inti teori Fiedler.","✔ Fiedler: kesesuaian gaya dengan situasi kerja menentukan keberhasilan.","Gaji bukan faktor dalam model kontingensi Fiedler.","Usia pemimpin bukan variabel Fiedler."]},
+  {t:"lead",tp:"Recall",q:"Pemimpin yang memotivasi bawahan lewat pertukaran kinerja dan imbalan berciri kepemimpinan...",o:["Transformasional","Transaksional","Karismatik","Laissez-faire"],a:1,e:"Transactional: tetapkan tujuan, beri penghargaan, koreksi bila standar tak terpenuhi.",oe:["Transformasional = inspirasi, visi bersama, dorong perubahan.","✔ Transaksional = motivasi lewat pertukaran kinerja–imbalan + tindakan korektif.","Karismatik = pengaruh lewat daya tarik pribadi, bukan pertukaran imbalan.","Laissez-faire = pemimpin membiarkan bawahan tanpa banyak arahan."]},
+  {t:"lead",tp:"Recall",q:"Dalam teori LMX, hubungan berkualitas tinggi pemimpin–bawahan disebut...",o:["Out-group","In-group","Nominal group","Reference group"],a:1,e:"In-group memperoleh kepercayaan, dukungan, dan kesempatan lebih besar.",oe:["Out-group = hubungan formal & terbatas pada tugas.","✔ In-group = hubungan berkualitas tinggi: kepercayaan & dukungan lebih besar.","Nominal group = individu bekerja sendiri tanpa interaksi (konsep tim).","Reference group = kelompok acuan, bukan istilah LMX."]},
+  {t:"lead",tp:"Recall",q:"Istilah 'glass ceiling' mengacu pada...",o:["transparansi organisasi","hambatan tak terlihat yang menghalangi perempuan ke posisi tinggi","promosi otomatis","keterbukaan gaji"],a:1,e:"Glass ceiling = hambatan perempuan mencapai posisi puncak manajemen.",oe:["Glass ceiling bukan soal transparansi organisasi.","✔ Glass ceiling = hambatan tak terlihat menuju posisi puncak (khususnya perempuan).","Tidak berkaitan dengan promosi otomatis.","Bukan soal keterbukaan gaji."]},
+  {t:"lead",tp:"Recall",q:"Empat gaya supervisi Path-Goal Theory: directive, supportive, participative, dan...",o:["coercive","transactional","achievement","referent"],a:2,e:"Path-Goal: supervisor membuka 'jalan' menuju tujuan; gaya disesuaikan situasi.",oe:["Coercive = jenis kekuasaan, bukan gaya Path-Goal.","Transactional = jenis kepemimpinan, bukan gaya Path-Goal.","✔ Achievement = gaya Path-Goal (selain directive, supportive, participative).","Referent = jenis kekuasaan, bukan gaya Path-Goal."]},
+  {t:"lead",tp:"Recall",q:"Kekuasaan dari kemampuan memberi hukuman atau sanksi (teguran, penurunan jabatan) disebut...",o:["Reward power","Coercive power","Expert power","Referent power"],a:1,e:"Coercive power = kekuasaan paksaan/hukuman.",oe:["Reward power = memberi penghargaan, bukan hukuman.","✔ Coercive power = kekuasaan paksaan/hukuman (sanksi, teguran).","Expert power = kekuasaan dari keahlian/pengetahuan.","Referent power = kekuasaan dari keteladanan & rasa hormat."]},
+  {t:"lead",tp:"Recall",q:"Perilaku pemimpin yang berfokus pada penyelesaian pekerjaan, pembagian tugas, dan pencapaian target disebut...",o:["Relationship-oriented behavior","Task-oriented behavior","Referent behavior","Achievement behavior"],a:1,e:"Behavioral Approach membedakan task-oriented (fokus tugas) & relationship-oriented (fokus hubungan).",oe:["Relationship-oriented = fokus membangun hubungan baik dengan bawahan.","✔ Task-oriented = fokus penyelesaian pekerjaan, pembagian tugas, target.","Referent behavior = bukan istilah dalam behavioral approach.","Achievement behavior = gaya Path-Goal, bukan kategori ini."]},
+
+  {t:"sat",tp:"Recall",q:"Pendekatan yang melihat kepuasan kerja sebagai perasaan terhadap pekerjaan secara keseluruhan disebut...",o:["The Facet Approach","The Global Approach","Trait Approach","Behavioral Approach"],a:1,e:"Global = keseluruhan; facet = per-aspek.",oe:["Facet approach = kepuasan per-aspek pekerjaan.","✔ Global approach = kepuasan terhadap pekerjaan secara keseluruhan.","Trait approach = pendekatan kepemimpinan, bukan kepuasan.","Behavioral approach = pendekatan kepemimpinan, bukan kepuasan."]},
+  {t:"sat",tp:"Recall",q:"Pendekatan facet mengukur kepuasan kerja terhadap...",o:["pekerjaan keseluruhan saja","berbagai aspek (gaji, lingkungan, tunjangan)","hanya gaji","hanya atasan"],a:1,e:"Facet approach memberi gambaran rinci tiap aspek pekerjaan.",oe:["Itu global approach, bukan facet.","✔ Facet = menilai tiap aspek pekerjaan (gaji, lingkungan, tunjangan, dll).","Terlalu sempit; facet mencakup banyak aspek.","Terlalu sempit; facet mencakup banyak aspek."]},
+  {t:"sat",tp:"Analisis",q:"Berikut instrumen pengukur kepuasan kerja, KECUALI...",o:["JDI","MSQ","JIG","MBI (Maslach Burnout Inventory)"],a:3,e:"MBI mengukur burnout, bukan kepuasan kerja.",oe:["JDI = Job Descriptive Index, mengukur kepuasan kerja.","MSQ = Minnesota Satisfaction Questionnaire, mengukur kepuasan kerja.","JIG = Job In General scale, mengukur kepuasan kerja.","✔ MBI mengukur burnout — BUKAN kepuasan kerja (jawaban 'kecuali')."]},
+  {t:"sat",tp:"Recall",q:"Keadilan atas hasil yang diterima (gaji, bonus, promosi) termasuk...",o:["Procedural justice","Distributive justice","Interactional justice","Global justice"],a:1,e:"Distributive = keadilan hasil; procedural = keadilan proses.",oe:["Procedural = keadilan proses/prosedur pengambilan keputusan.","✔ Distributive = keadilan atas hasil (gaji, bonus, promosi).","Interactional = keadilan perlakuan antarpribadi.","Global justice = bukan istilah baku di sini."]},
+  {t:"sat",tp:"Analisis",q:"Hubungan usia dan kepuasan kerja digambarkan berbentuk...",o:["garis lurus menurun","kurva U","garis lurus naik","tidak ada hubungan"],a:1,e:"Kurva U: tinggi di awal, turun di tengah, naik lagi di akhir karier.",oe:["Hubungannya tidak berbentuk garis lurus menurun.","✔ Kurva U: tinggi di awal, turun di tengah, naik lagi di akhir karier.","Bukan garis lurus naik.","Ada hubungan, berbentuk kurva U."]},
+  {t:"sat",tp:"Aplikasi",q:"Lulusan S2 bekerja di posisi yang hanya butuh lulusan SMA. Kondisi ini disebut...",o:["underemployment","burnout","turnover","overload"],a:0,e:"Underemployment menurunkan kepuasan & motivasi, menaikkan turnover intention.",oe:["✔ Underemployment = pendidikan/keterampilan tak dimanfaatkan maksimal.","Burnout = kelelahan akibat stres kerja berkepanjangan.","Turnover = keluar/pindah dari organisasi.","Overload = beban kerja berlebih (kebalikan situasi ini)."]},
+  {t:"sat",tp:"Recall",q:"Komitmen ketika karyawan bertahan karena rugi jika keluar (gaji, tunjangan) disebut...",o:["Affective","Continuance","Normative","Moral"],a:1,e:"Continuance commitment = bertahan karena membutuhkan organisasi.",oe:["Affective = bertahan karena ingin (ikatan emosional).","✔ Continuance = bertahan karena butuh/rugi jika keluar.","Normative = bertahan karena merasa wajib (tanggung jawab moral).","Moral = bukan salah satu dari 3 komponen komitmen."]},
+  {t:"sat",tp:"Recall",q:"Deep acting dan surface acting adalah dua cara menghadapi tuntutan...",o:["fisik","emosional (emotional labor)","kognitif","finansial"],a:1,e:"Deep acting lebih sehat; surface acting melelahkan.",oe:["Bukan tuntutan fisik.","✔ Deep/surface acting = strategi menghadapi tuntutan emosional (emotional labor).","Bukan tuntutan kognitif.","Bukan tuntutan finansial."]},
+  {t:"sat",tp:"Aplikasi",q:"Karyawan yang optimis, berpikir positif, dan stabil secara emosional cenderung...",o:["lebih mudah tidak puas","lebih puas terhadap pekerjaannya","tidak terpengaruh kepribadian","selalu ingin pindah kerja"],a:1,e:"Kepribadian positif → cenderung lebih puas; pesimis/fokus negatif → lebih mudah tidak puas.",oe:["Itu justru ciri orang pesimis/fokus negatif.","✔ Optimis, positif, stabil emosi → cenderung lebih puas.","Salah; kepribadian berpengaruh pada kepuasan kerja.","Tidak; itu tidak mengikuti dari kepribadian positif."]},
+  {t:"sat",tp:"Recall",q:"Dalam job characteristics, kebebasan karyawan menentukan cara bekerja disebut...",o:["Variety","Autonomy","Feedback","Significance"],a:1,e:"Autonomy = kebebasan dalam bekerja; salah satu dari 5 karakteristik pekerjaan.",oe:["Variety = ragam tugas/keterampilan.","✔ Autonomy = kebebasan menentukan cara bekerja.","Feedback = mendapat umpan balik atas hasil kerja.","Significance = pekerjaan dirasa penting/bermakna."]},
+
+  {t:"prod",tp:"Recall",q:"KSAOs terdiri dari Knowledge, Skill, Abilities, dan...",o:["Objectives","Opportunities","Other Characteristics","Outcomes"],a:2,e:"KSAOs = Knowledge, Skills, Abilities, Other characteristics.",oe:["'O' pada KSAO bukan Objectives.","'O' pada KSAO bukan Opportunities.","✔ KSAO = Knowledge, Skills, Abilities, Other characteristics.","'O' pada KSAO bukan Outcomes."]},
+  {t:"prod",tp:"Analisis",q:"Dimensi Big Five yang dipandang prediktor kuat keberhasilan kerja adalah...",o:["Extraversion","Openness","Conscientiousness","Neuroticism"],a:2,e:"Conscientious cenderung disiplin, tekun, konsisten berkinerja baik.",oe:["Extraversion = mudah bergaul/energik; bukan prediktor terkuat kinerja umum.","Openness = terbuka pada pengalaman/ide baru.","✔ Conscientiousness = disiplin, tekun, terorganisasi → prediktor kuat kinerja.","Neuroticism = kecenderungan emosi negatif (bisa menurunkan kinerja)."]},
+  {t:"prod",tp:"Recall",q:"Perilaku sukarela di luar tugas formal yang menguntungkan organisasi disebut...",o:["CWB","OCB","KSAO","CSCW"],a:1,e:"OCB: membantu rekan, mematuhi aturan, memberi saran inovatif.",oe:["CWB = perilaku yang merugikan organisasi (kebalikannya).","✔ OCB = perilaku sukarela di luar tugas formal yang menguntungkan organisasi.","KSAO = pengetahuan/keterampilan/kemampuan (fondasi kinerja).","CSCW = kolaborasi kerja berbantuan komputer."]},
+  {t:"prod",tp:"Analisis",q:"Berikut termasuk CWB bentuk withdrawal, KECUALI...",o:["Absence","Cyberloafing","Lateness","Altruism"],a:3,e:"Altruism adalah OCB (positif). Withdrawal: absence, cyberloafing, lateness, turnover.",oe:["Absence = ketidakhadiran → withdrawal.","Cyberloafing = pakai internet untuk pribadi saat kerja → withdrawal.","Lateness = datang terlambat → withdrawal.","✔ Altruism = perilaku OCB (positif), BUKAN withdrawal (jawaban 'kecuali')."]},
+  {t:"prod",tp:"Recall",q:"Menggunakan internet/gawai untuk urusan pribadi saat bekerja disebut...",o:["cyberloafing","sabotage","telepressure","social loafing"],a:0,e:"Cyberloafing mengurangi fokus & produktivitas.",oe:["✔ Cyberloafing = pakai internet/gawai untuk urusan pribadi saat kerja.","Sabotage = merusak/memperlambat kerja dengan sengaja.","Telepressure = dorongan terus mengecek pesan kerja.","Social loafing = mengurangi usaha saat bekerja dalam kelompok."]},
+  {t:"prod",tp:"Aplikasi",q:"Karyawan yang percaya keberhasilannya ditentukan usahanya sendiri memiliki...",o:["locus of control eksternal","locus of control internal","trait anger","negative affectivity"],a:1,e:"Locus internal: proaktif, berinisiatif tinggi, bertanggung jawab.",oe:["Eksternal = percaya hasil ditentukan faktor luar/keberuntungan.","✔ Internal = percaya hasil ditentukan usaha sendiri; proaktif.","Trait anger = kecenderungan mudah marah.","Negative affectivity = kecenderungan mengalami emosi negatif."]},
+  {t:"prod",tp:"Recall",q:"Merusak alat/memperlambat pekerjaan dengan sengaja untuk menghambat organisasi disebut...",o:["theft","sabotage","aggression","withdrawal"],a:1,e:"Sabotage = bentuk CWB yang merusak/memperlambat kerja secara sengaja.",oe:["Theft = pencurian aset organisasi.","✔ Sabotage = merusak alat/memperlambat kerja dengan sengaja.","Aggression = bullying, ancaman, atau kekerasan.","Withdrawal = menarik diri (absen, terlambat, dll)."]},
+  {t:"prod",tp:"Recall",q:"Dua jenis OCB berdasarkan sasarannya adalah...",o:["altruism & compliance","OCBI & OCBO","internal & eksternal","task & contextual"],a:1,e:"OCBI (ke individu) & OCBO (ke organisasi langsung).",oe:["Altruism & compliance = bentuk OCB, bukan pembagian berdasarkan sasaran.","✔ OCBI (ke individu) & OCBO (ke organisasi) = pembagian berdasarkan sasaran.","Internal/eksternal = istilah motivasi/locus, bukan OCB.","Task/contextual = jenis performa kerja, bukan sasaran OCB."]},
+  {t:"prod",tp:"Recall",q:"Proses mengubah ide baru menjadi tindakan nyata dalam pekerjaan disebut...",o:["Creativity","Innovation","Mental model","Compliance"],a:1,e:"Creativity = menghasilkan ide baru; Innovation = menerapkan ide dalam pekerjaan.",oe:["Creativity = menghasilkan ide baru (tahap sebelum penerapan).","✔ Innovation = menerapkan ide baru menjadi tindakan nyata.","Mental model = pemahaman tentang cara kerja sistem.","Compliance = mematuhi aturan (bentuk OCB)."]},
+  {t:"prod",tp:"Recall",q:"Sumber motivasi dari kebutuhan berprestasi, ambisi pribadi, dan nilai hidup disebut motivasi...",o:["eksternal","internal","instrumental","normatif"],a:1,e:"Motivasi internal dari dalam diri; eksternal dari lingkungan (penghargaan, dukungan sosial).",oe:["Eksternal = dari lingkungan (penghargaan, dukungan sosial, kepemimpinan).","✔ Internal = dari dalam diri (kebutuhan berprestasi, ambisi, nilai hidup).","Instrumental = bukan kategori sumber motivasi di materi.","Normatif = istilah komitmen, bukan sumber motivasi."]},
+
+  {t:"health",tp:"Recall",q:"Occupational Health Psychology (OHP) berfokus pada...",o:["keuntungan finansial","kesehatan, keselamatan & kesejahteraan pekerja","strategi pemasaran","rekrutmen"],a:1,e:"OHP mengkaji faktor psikologis yang memengaruhi kesehatan kerja.",oe:["OHP bukan soal keuntungan finansial.","✔ OHP fokus pada kesehatan, keselamatan & kesejahteraan pekerja.","Bukan; itu ranah pemasaran.","Bukan; itu ranah rekrutmen."]},
+  {t:"health",tp:"Recall",q:"Pencegahan paparan penyakit menular (sarung tangan, wadah benda tajam, disinfektan) disebut...",o:["Safety climate","Universal Precautions","Flextime","Respite"],a:1,e:"Universal Precautions: sarung tangan, apron, masker, wadah khusus benda tajam.",oe:["Safety climate = persepsi bersama tentang keselamatan kerja.","✔ Universal Precautions = prosedur cegah paparan penyakit menular.","Flextime = jadwal kerja fleksibel.","Respite = istirahat untuk pemulihan."]},
+  {t:"health",tp:"Recall",q:"Cedera otot, tulang, dan jaringan ikat akibat gerakan berulang disebut...",o:["Burnout","Musculoskeletal Disorders (MSDs)","Role conflict","Telepressure"],a:1,e:"MSDs berkembang akibat aktivitas fisik berulang di tempat kerja.",oe:["Burnout = kelelahan emosional akibat stres kerja.","✔ MSDs = cedera otot/tulang/jaringan ikat akibat gerakan berulang.","Role conflict = tuntutan peran yang berbenturan.","Telepressure = dorongan terus mengecek pesan kerja."]},
+  {t:"health",tp:"Recall",q:"Ketidakpastian karyawan mengenai fungsi & tanggung jawab pekerjaannya disebut...",o:["Role conflict","Role ambiguity","Workload","Autonomy"],a:1,e:"Role ambiguity = ketidakpastian peran; role conflict = tuntutan berbenturan.",oe:["Role conflict = tuntutan yang tidak sejalan/berbenturan.","✔ Role ambiguity = ketidakpastian fungsi & tanggung jawab kerja.","Workload = beban/jumlah pekerjaan.","Autonomy = kebebasan mengambil keputusan kerja."]},
+  {t:"health",tp:"Analisis",q:"Menurut Demand/Control Model (Karasek, 1979), demands hanya menyebabkan strain ketika...",o:["gaji rendah","control tidak mencukupi","rekan kerja banyak","jam kerja pendek"],a:1,e:"Control berfungsi sebagai stress buffer.",oe:["Gaji rendah bukan faktor dalam model Karasek.","✔ Demands memicu strain hanya bila control kurang (control = buffer).","Jumlah rekan bukan variabel model ini.","Bukan soal jam kerja pendek."]},
+  {t:"health",tp:"Recall",q:"MBI mengukur tiga komponen burnout: emotional exhaustion, depersonalization, dan...",o:["role conflict","reduced personal accomplishment","workload","autonomy"],a:1,e:"Reduced personal accomplishment = merasa tak mencapai hal berarti di tempat kerja.",oe:["Role conflict = stressor peran, bukan komponen burnout.","✔ Reduced personal accomplishment = komponen ketiga burnout.","Workload = beban kerja (stressor), bukan komponen burnout.","Autonomy = kontrol kerja, bukan komponen burnout."]},
+  {t:"health",tp:"Recall",q:"Istirahat yang memungkinkan seseorang melepaskan diri secara psikologis dari pekerjaan disebut...",o:["respite","strain","telepressure","workload"],a:0,e:"Respite: micro-break, istirahat makan siang, akhir pekan, hingga liburan.",oe:["✔ Respite = istirahat untuk melepaskan diri secara psikologis dari kerja.","Strain = reaksi negatif akibat stressor.","Telepressure = dorongan terus mengecek pesan kerja.","Workload = beban/jumlah pekerjaan."]},
+  {t:"health",tp:"Recall",q:"Kebebasan karyawan membuat keputusan tentang pekerjaannya sendiri disebut...",o:["demand","autonomy/control","strain","telepressure"],a:1,e:"Autonomy mencakup cara, tugas, kapan, dan di mana bekerja.",oe:["Demand = tuntutan/beban yang perlu adaptasi.","✔ Autonomy/control = kebebasan mengambil keputusan atas pekerjaan sendiri.","Strain = reaksi negatif akibat stressor.","Telepressure = dorongan terus mengecek pesan kerja."]},
+  {t:"health",tp:"Recall",q:"Jadwal kerja yang memungkinkan karyawan menentukan sebagian jam kerjanya sendiri disebut...",o:["Night shift","Flextime","Long shift","Fixed shift"],a:1,e:"Flextime mendukung tanggung jawab keluarga; keuntungan organisasi: less absence & tardiness.",oe:["Night shift = jadwal kerja malam.","✔ Flextime = karyawan menentukan sebagian jam kerjanya.","Long shift = shift lebih panjang dari 8 jam.","Fixed shift = jam kerja tetap/tidak berubah."]},
+  {t:"health",tp:"Recall",q:"Reaksi/dampak negatif (psikologis, fisik, perilaku) akibat job stressors disebut...",o:["Job demand","Job strain","Autonomy","Respite"],a:1,e:"Job strain = reaksi negatif akibat stressor: mis. frustrasi, sakit, absen.",oe:["Job demand = tuntutan/stressor yang membebani.","✔ Job strain = reaksi negatif (psikologis, fisik, perilaku) akibat stressor.","Autonomy = kebebasan mengatur pekerjaan.","Respite = istirahat untuk pemulihan."]},
+
+  {t:"team",tp:"Analisis",q:"Perbedaan utama work group dan work team adalah...",o:["tidak ada beda","work team: tujuan sama, saling membutuhkan, bagian masing-masing","work group selalu lebih besar","work team tak berinteraksi"],a:1,e:"Work group = berbagi tugas terkait; work team = tujuan sama & saling bergantung.",oe:["Salah; keduanya berbeda.","✔ Work team: tujuan sama, saling bergantung, ada bagian masing-masing.","Ukuran bukan pembeda utamanya.","Salah; justru tim saling berinteraksi & bergantung."]},
+  {t:"team",tp:"Recall",q:"Tingkat ketertarikan anggota untuk tetap berada dalam kelompok disebut...",o:["group conflict","group cohesiveness","process loss","social loafing"],a:1,e:"Group cohesiveness = kekompakan / daya tarik tetap di kelompok.",oe:["Group conflict = dinamika perselisihan dalam kelompok.","✔ Group cohesiveness = ketertarikan anggota untuk tetap di kelompok.","Process loss = usaha hilang untuk aktivitas non-produksi.","Social loafing = mengurangi usaha dalam kelompok."]},
+  {t:"team",tp:"Recall",q:"Aturan tidak tertulis yang menjadi standar perilaku kelompok disebut...",o:["roles","norms","cohesiveness","mental model"],a:1,e:"Norms = aturan tak tertulis; roles = fungsi tiap anggota.",oe:["Roles = fungsi spesifik tiap anggota.","✔ Norms = aturan tak tertulis, standar perilaku kelompok.","Cohesiveness = kekompakan kelompok.","Mental model = kesamaan pemahaman tim atas tugas/strategi."]},
+  {t:"team",tp:"Aplikasi",q:"Kinerja seseorang meningkat karena ditonton orang lain pada tugas mudah. Ini contoh...",o:["social inhibition","social facilitation","social loafing","process loss"],a:1,e:"Social facilitation menaikkan kinerja tugas mudah; inhibition menurunkan tugas sulit.",oe:["Social inhibition = kinerja turun karena ditonton pada tugas sulit.","✔ Social facilitation = kinerja naik karena ditonton pada tugas mudah.","Social loafing = mengurangi usaha dalam kelompok.","Process loss = usaha hilang untuk koordinasi/konflik."]},
+  {t:"team",tp:"Recall",q:"Kelompok mengambil keputusan buruk meski sebagian anggota tahu itu salah disebut...",o:["group polarization","groupthink","brainstorming","social loafing"],a:1,e:"Groupthink: tekanan konformitas → keputusan buruk tetap diambil.",oe:["Group polarization = keputusan kelompok jadi lebih ekstrem.","✔ Groupthink = keputusan buruk demi konformitas meski sebagian tahu salah.","Brainstorming = teknik menghasilkan ide tanpa kritik.","Social loafing = mengurangi usaha dalam kelompok."]},
+  {t:"team",tp:"Recall",q:"Waktu & usaha hilang untuk aktivitas non-produksi (koordinasi, konflik) disebut...",o:["social loafing","process loss","group polarization","additive task"],a:1,e:"Process loss + social loafing membuat kelompok interaktif kadang kalah dari nominal.",oe:["Social loafing = mengurangi usaha pribadi dalam kelompok.","✔ Process loss = waktu/usaha hilang untuk aktivitas non-produksi.","Group polarization = keputusan jadi lebih ekstrem.","Additive task = tugas yang hasilnya jumlah kontribusi anggota."]},
+  {t:"team",tp:"Recall",q:"Perbedaan pengetahuan, keterampilan, nilai, dan cara berpikir antaranggota disebut...",o:["demographic diversity","cognitive diversity","process loss","groupthink"],a:1,e:"Cognitive diversity cenderung meningkatkan inovasi tim.",oe:["Demographic diversity = perbedaan yang mudah terlihat (usia, gender).","✔ Cognitive diversity = beda pengetahuan, nilai, cara berpikir.","Process loss = usaha hilang untuk non-produksi.","Groupthink = keputusan buruk demi konformitas."]},
+  {t:"team",tp:"Recall",q:"Tim dengan otonomi tinggi di mana supervisor berperan sebagai pelatih disebut...",o:["Quality Circles","Autonomous Work Teams","Nominal groups","Virtual teams"],a:1,e:"Autonomous Work Teams: otonomi tinggi, supervisor jadi coach.",oe:["Quality Circles = pertemuan rutin untuk solusi efisiensi & kualitas.","✔ Autonomous Work Teams = otonomi tinggi; supervisor jadi pelatih.","Nominal groups = individu bekerja sendiri tanpa interaksi.","Virtual teams = kolaborasi lewat teknologi jarak jauh."]},
+  {t:"team",tp:"Recall",q:"Tim yang bekerja & berkolaborasi melalui teknologi komunikasi tanpa batasan jarak disebut...",o:["Nominal team","Virtual team","Quality circle","Additive team"],a:1,e:"Virtual teams berkolaborasi lewat teknologi komunikasi tanpa batas lokasi.",oe:["Nominal = individu bekerja sendiri tanpa interaksi.","✔ Virtual team = kolaborasi lewat teknologi komunikasi tanpa batas jarak.","Quality circle = pertemuan rutin untuk efisiensi & kualitas.","Additive team = bukan istilah baku (additive task = jenis tugas)."]},
+  {t:"team",tp:"Recall",q:"Pertemuan rutin sekelompok pekerja untuk mencari solusi efisiensi dan kualitas disebut...",o:["Team building","Quality Circles","Brainstorming","Nominal group"],a:1,e:"Quality Circles (lingkar kualitas): pertemuan rutin pekerja untuk solusi efisiensi & kualitas.",oe:["Team building = intervensi memperkuat relasi & produktivitas tim.","✔ Quality Circles = pertemuan rutin pekerja untuk solusi efisiensi & kualitas.","Brainstorming = teknik menghasilkan ide tanpa kritik.","Nominal group = individu bekerja sendiri tanpa interaksi."]}
 ];
 
 // ---- Flashcards ----
@@ -311,7 +313,9 @@ document.querySelectorAll('.tab').forEach(tab=>{
 });
 
 /* ===== MC ===== */
-let mcBab='all', mcType='all', mcOrder=null, mcState={};
+let mcBab='all', mcType='all', mcOrder=null;
+let mcAns={};    // qIndex -> chosen option index (first answer, for scoring)
+let mcShown={};  // qIndex -> Set of option indices whose note is revealed
 function buildFilterChips(container,map,current,cb){
   container.querySelectorAll('.chip').forEach(c=>c.remove());
   const add=(key,label)=>{const b=document.createElement('button');b.className='chip'+(current===key?' on':'');
@@ -332,29 +336,45 @@ function renderMC(){
   if(!list.length){wrap.innerHTML='<div class="card empty">Tidak ada soal untuk filter ini.</div>';updateMcScore();return;}
   const keys=['A','B','C','D','E'];
   list.forEach(({q,i},n)=>{
+    const answered = mcAns[i]!==undefined;
+    const shown = mcShown[i] || new Set();
     const card=document.createElement('div');card.className='card';
     card.innerHTML=`<div class="qhead"><span class="badge">${n+1}. ${BAB[q.t]}</span><span class="pill">${q.tp}</span></div>
       <div class="qtext">${q.q}</div>`;
-    const body=document.createElement('div');
     q.o.forEach((opt,oi)=>{
       const btn=document.createElement('button');btn.className='opt';btn.type='button';
       btn.innerHTML=`<span class="optkey">${keys[oi]}.</span>${opt}`;
-      const st=mcState[i];
-      if(st!==undefined){btn.disabled=true;
-        if(oi===q.a)btn.classList.add('correct');
-        if(oi===st&&st!==q.a)btn.classList.add('wrong');}
+      if(answered){
+        if(oi===q.a) btn.classList.add('correct');
+        else if(shown.has(oi)) btn.classList.add('wrong');
+      }
       btn.onclick=()=>{
-        mcState[i]=oi;
+        if(mcAns[i]===undefined){
+          mcAns[i]=oi;
+          mcShown[i]=new Set([oi,q.a]);
+        }else{
+          const s=mcShown[i];
+          if(oi!==q.a && oi!==mcAns[i]){ s.has(oi)?s.delete(oi):s.add(oi); }
+        }
         renderMC();
       };
-      body.appendChild(btn);
+      card.appendChild(btn);
+      // per-option note
+      if(answered && (oi===q.a || shown.has(oi))){
+        const note=document.createElement('div');
+        note.className='onote '+(oi===q.a?'good':'bad');
+        note.textContent=q.oe[oi];
+        card.appendChild(note);
+      }
     });
-    card.appendChild(body);
-    if(mcState[i]!==undefined){
-      const ok=mcState[i]===q.a;
+    if(answered){
+      const ok=mcAns[i]===q.a;
       const ex=document.createElement('div');ex.className='explain';
       ex.innerHTML=`<b>${ok?'✅ Benar!':'❌ Kurang tepat.'}</b> ${q.e}`;
       card.appendChild(ex);
+      const tip=document.createElement('div');tip.className='tip';
+      tip.textContent='Ketuk pilihan lain untuk melihat definisinya.';
+      card.appendChild(tip);
     }
     wrap.appendChild(card);
   });
@@ -363,11 +383,11 @@ function renderMC(){
 function updateMcScore(){
   const list=mcFilteredList();
   let ans=0,cor=0;
-  list.forEach(({q,i})=>{if(mcState[i]!==undefined){ans++;if(mcState[i]===q.a)cor++;}});
+  list.forEach(({q,i})=>{if(mcAns[i]!==undefined){ans++;if(mcAns[i]===q.a)cor++;}});
   document.getElementById('mcScore').textContent=`${cor} / ${ans}`;
 }
 document.getElementById('mcShuffle').onclick=()=>{mcOrder=shuffle(MC.map((_,i)=>i));renderMC();window.scrollTo(0,0);};
-document.getElementById('mcReset').onclick=()=>{mcState={};mcOrder=null;mcBab='all';mcType='all';renderMC();window.scrollTo(0,0);};
+document.getElementById('mcReset').onclick=()=>{mcAns={};mcShown={};mcOrder=null;mcBab='all';mcType='all';renderMC();window.scrollTo(0,0);};
 
 /* ===== FLASHCARDS ===== */
 let fcBab='all', fcDeck=[], fcIdx=0, fcMark={};
